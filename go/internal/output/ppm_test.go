@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"io"
 	"io/ioutil"
-	"os"
 	"path"
 	"testing"
 
@@ -24,7 +23,7 @@ var testImages = []struct {
 }{
 	{
 		name:     "black",
-		testFile: path.Join("..", "..","..", "test", "ppm", "black.ppm"),
+		testFile: path.Join("..", "..", "..", "test", "ppm", "black.ppm"),
 		image: func() image.Image {
 			return image.NewPaletted(image.Rect(0, 0, 10, 10), color.Palette{
 				image.Black,
@@ -32,7 +31,7 @@ var testImages = []struct {
 		}},
 	{
 		name:     "white",
-		testFile: path.Join("..", "..","..", "test", "ppm", "white.ppm"),
+		testFile: path.Join("..", "..", "..", "test", "ppm", "white.ppm"),
 		image: func() image.Image {
 			return image.NewPaletted(image.Rect(0, 0, 10, 10), color.Palette{
 				image.White,
@@ -40,39 +39,39 @@ var testImages = []struct {
 		}},
 	{
 		name:     "rgb",
-		testFile: path.Join("..", "..","..", "test", "ppm", "rgb.ppm"),
+		testFile: path.Join("..", "..", "..", "test", "ppm", "rgb.ppm"),
 		image: func() image.Image {
 			nx := 3
 			ny := 2
 			img := image.NewRGBA(image.Rect(0, 0, nx, ny))
 
 			// red
-			img.Set(0, 0, color.RGBA{
+			img.Set(0, 1, color.RGBA{
 				R: 255, G: 0, B: 0,
 				A: 0xff,
 			})
 			// green
-			img.Set(1, 0, color.RGBA{
+			img.Set(1, 1, color.RGBA{
 				R: 0, G: 255, B: 0,
 				A: 0xff,
 			})
 			// blue
-			img.Set(2, 0, color.RGBA{
+			img.Set(2, 1, color.RGBA{
 				R: 0, G: 0, B: 255,
 				A: 0xff,
 			})
 			// yellow
-			img.Set(0, 1, color.RGBA{
+			img.Set(0, 0, color.RGBA{
 				R: 255, G: 255, B: 0,
 				A: 0xff,
 			})
 			// white
-			img.Set(1, 1, color.RGBA{
+			img.Set(1, 0, color.RGBA{
 				R: 255, G: 255, B: 255,
 				A: 0xff,
 			})
 			// black
-			img.Set(2, 1, color.RGBA{
+			img.Set(2, 0, color.RGBA{
 				R: 0, G: 0, B: 0,
 				A: 0xff,
 			})
@@ -80,7 +79,7 @@ var testImages = []struct {
 		}},
 	{
 		name:     "color",
-		testFile: path.Join("..", "..","..", "test", "ppm", "color.ppm"),
+		testFile: path.Join("..", "..", "..", "test", "ppm", "color.ppm"),
 		image: func() image.Image {
 			nx := 200
 			ny := 100
@@ -107,7 +106,7 @@ func TestPPMWriter(t *testing.T) {
 	dir, err := ioutil.TempDir("", "TestPPMWriter")
 	require.NoError(t, err)
 	defer func() {
-		_ = os.RemoveAll(dir)
+		//_ = os.RemoveAll(dir)
 	}()
 
 	for i := range testImages {
