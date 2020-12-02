@@ -1,6 +1,7 @@
 package ray_test
 
 import (
+	"fmt"
 	"image"
 	"testing"
 
@@ -42,8 +43,40 @@ func Test_ray_set(t *testing.T) {
 
 func Test_ray_get(t *testing.T) {
 	newRay := ray.NewRay(1, 2, 3, 0, 0, 0)
-	assert.Equal(t, float64(1), newRay.GetX())
-	assert.Equal(t, float64(2), newRay.GetY())
-	assert.Equal(t, float64(3), newRay.GetZ())
+	assert.Equal(t, float64(1), newRay.Origin().GetX())
+	assert.Equal(t, float64(2), newRay.Origin().GetY())
+	assert.Equal(t, float64(3), newRay.Origin().GetZ())
+}
 
+func TestRay_PointAt(t *testing.T) {
+	newRayAt := ray.NewRayAt(ray.NewVec(2, 3, 4), ray.NewVec(1, 0, 0))
+
+	testCases := []struct {
+		tick     float64
+		expected ray.Vector
+	}{
+		{
+			tick:     0,
+			expected: ray.NewVec(2, 3, 4),
+		},
+		{
+			tick:     1,
+			expected: ray.NewVec(3, 3, 4),
+		},
+		{
+			tick:     -1,
+			expected: ray.NewVec(1, 3, 4),
+		},
+		{
+			tick:     2.5,
+			expected: ray.NewVec(4.5, 3, 4),
+		},
+	}
+	for _, tt := range testCases {
+		name := fmt.Sprintf("tick_%v", tt.tick)
+		t.Run(name, func(t *testing.T) {
+			position := newRayAt.PointAt(tt.tick)
+			assertVec(t, tt.expected, position)
+		})
+	}
 }

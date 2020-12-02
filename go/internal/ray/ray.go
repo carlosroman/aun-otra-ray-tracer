@@ -5,20 +5,21 @@ import (
 )
 
 type ray struct {
-	v     Vector
+	o     Vector
+	d     Vector
 	color color.RGBA
 }
 
-func (r ray) GetX() float64 {
-	return r.v.GetX()
+func (r ray) Origin() Vector {
+	return r.o
 }
 
-func (r ray) GetY() float64 {
-	return r.v.GetY()
+func (r ray) Direction() Vector {
+	return r.d
 }
 
-func (r ray) GetZ() float64 {
-	return r.v.GetZ()
+func (r ray) PointAt(parameter float64) Vector {
+	return r.o.Add(r.d.Multiply(parameter))
 }
 
 func (r *ray) SetR(redVal uint8) {
@@ -28,6 +29,7 @@ func (r *ray) SetR(redVal uint8) {
 func (r *ray) SetG(greenVal uint8) {
 	r.color.G = greenVal
 }
+
 func (r *ray) SetB(blueVal uint8) {
 	r.color.B = blueVal
 }
@@ -38,16 +40,24 @@ func (r ray) RGBA() (red, green, blue, alpha uint32) {
 
 type Ray interface {
 	color.Color
-	Vector
+	Origin() Vector
+	Direction() Vector
+	PointAt(parameter float64) Vector
 	SetR(redVal uint8)
 	SetG(greenVal uint8)
 	SetB(blueVal uint8)
-	GetX() float64
+}
+
+func NewRayAt(point, vector Vector) Ray {
+	return &ray{
+		o: point,
+		d: vector,
+	}
 }
 
 func NewRay(x, y, z float64, r, g, b uint8) Ray {
 	return &ray{
-		v: NewVec(x, y, z),
+		o: NewVec(x, y, z),
 		color: color.RGBA{
 			R: r,
 			G: g,

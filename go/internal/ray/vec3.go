@@ -1,6 +1,8 @@
 package ray
 
-import "math"
+import (
+	"math"
+)
 
 type vec3 struct {
 	x, y, z float64
@@ -8,7 +10,7 @@ type vec3 struct {
 
 var zero = NewVec(0, 0, 0)
 
-func NewVec(x, y, z float64) vec3 {
+func NewVec(x, y, z float64) Vector {
 	return vec3{
 		x: x,
 		y: y,
@@ -28,32 +30,32 @@ func (v vec3) GetZ() float64 {
 	return v.z
 }
 
-func (v vec3) Add(vec vec3) vec3 {
+func (v vec3) Add(vec Vector) Vector {
 	return NewVec(
-		v.x+vec.x,
-		v.y+vec.y,
-		v.z+vec.z)
+		v.x+vec.GetX(),
+		v.y+vec.GetY(),
+		v.z+vec.GetZ())
 }
 
-func (v vec3) Subtract(vec vec3) vec3 {
+func (v vec3) Subtract(vec Vector) Vector {
 	return NewVec(
-		v.x-vec.x,
-		v.y-vec.y,
-		v.z-vec.z)
+		v.x-vec.GetX(),
+		v.y-vec.GetY(),
+		v.z-vec.GetZ())
 }
 
-func (v vec3) Multiply(by float64) vec3 {
+func (v vec3) Multiply(by float64) Vector {
 	return NewVec(
 		v.x*by,
 		v.y*by,
 		v.z*by)
 }
 
-func (v vec3) Divide(by float64) vec3 {
+func (v vec3) Divide(by float64) Vector {
 	return v.Multiply(1 / by)
 }
 
-func (v vec3) Negate() vec3 {
+func (v vec3) Negate() Vector {
 	return zero.Subtract(v)
 }
 
@@ -62,7 +64,7 @@ func (v vec3) Magnitude() float64 {
 		(v.x * v.x) + (v.y * v.y) + (v.z * v.z))
 }
 
-func (v vec3) Normalize() vec3 {
+func (v vec3) Normalize() Vector {
 	magnitude := v.Magnitude()
 	return v.Divide(magnitude)
 }
