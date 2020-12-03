@@ -8,11 +8,16 @@ import (
 
 type Object interface {
 	Intersect(ray ray.Ray) []float64
+	NormalAt(point ray.Vector) ray.Vector
 }
 
 type sphere struct {
 	c ray.Vector
 	r float64
+}
+
+func (s sphere) NormalAt(point ray.Vector) ray.Vector {
+	return point.Subtract(s.c).Normalize()
 }
 
 func (s sphere) Intersect(r ray.Ray) []float64 {

@@ -1,6 +1,7 @@
 package object_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
@@ -60,6 +61,48 @@ func TestSphere_Intersect(t *testing.T) {
 			for i := range tt.expected {
 				assert.Equal(t, tt.expected[i], intersects[i])
 			}
+		})
+	}
+}
+
+func TestSphere_NormalAt(t *testing.T) {
+
+	testCases := []struct {
+		name     string
+		point    ray.Vector
+		sphere   object.Object
+		expected ray.Vector
+	}{
+		{
+			name:     "X axis",
+			point:    ray.NewVec(1, 0, 0),
+			sphere:   object.NewSphere(ray.NewVec(0, 0, 0), 1),
+			expected: ray.NewVec(1, 0, 0),
+		},
+		{
+			name:     "Y axis",
+			point:    ray.NewVec(0, 1, 0),
+			sphere:   object.NewSphere(ray.NewVec(0, 0, 0), 1),
+			expected: ray.NewVec(0, 1, 0),
+		},
+		{
+			name:     "Z axis",
+			point:    ray.NewVec(0, 0, 1),
+			sphere:   object.NewSphere(ray.NewVec(0, 0, 0), 1),
+			expected: ray.NewVec(0, 0, 1),
+		},
+		{
+			name:     "nonaxial",
+			point:    ray.NewVec(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
+			sphere:   object.NewSphere(ray.NewVec(0, 0, 0), 1),
+			expected: ray.NewVec(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.sphere.NormalAt(tt.point)
+			assert.Equal(t, tt.expected, actual)
+			assert.Equal(t, tt.expected, actual.Normalize())
 		})
 	}
 }
