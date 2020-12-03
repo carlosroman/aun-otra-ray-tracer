@@ -1,6 +1,7 @@
 package ray_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -64,12 +65,12 @@ func Test_vec3_Magnitude(t *testing.T) {
 		{
 			name:              "positive",
 			v:                 ray.NewVec(1, 2, 3),
-			expectedMagnitude: 3.74165738677,
+			expectedMagnitude: math.Sqrt(14),
 		},
 		{
 			name:              "negative",
 			v:                 ray.NewVec(-1, -2, -3),
-			expectedMagnitude: 3.74165738677,
+			expectedMagnitude: math.Sqrt(14),
 		},
 	}
 
