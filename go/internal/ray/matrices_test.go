@@ -139,6 +139,19 @@ func TestMatrix_Multiply_3x2_by_2x2(t *testing.T) {
 	assert.Equal(t, expected, a.Multiply(b))
 }
 
+func TestIdentityMatrix(t *testing.T) {
+	a := ray.IdentityMatrix(4, 4)
+	expected := ray.NewMatrix(4, 4)
+	expected.SetRow(0, 1, 0, 0, 0)
+	expected.SetRow(1, 0, 1, 0, 0)
+	expected.SetRow(2, 0, 0, 1, 0)
+	expected.SetRow(3, 0, 0, 0, 1)
+	assert.Equal(t, expected, a)
+
+	// Multiplying a matrix by the identity matrix returns the same matrix
+	assert.Equal(t, Get4x4(), Get4x4().Multiply(a))
+}
+
 func TestMatrix_Multiply_4x4_by_4x1(t *testing.T) {
 	a := ray.NewMatrix(4, 4)
 	a.SetRow(0, 1, 2, 3, 4)

@@ -61,3 +61,18 @@ func (m Matrix) String() string {
 	s = s + "]"
 	return s
 }
+
+func IdentityMatrix(rows, cols int) (result Matrix) {
+	result = NewMatrix(rows, cols)
+
+	for row := range result {
+		for col := range result[row] {
+			if col == row {
+				result[row][col] = 1
+			} else {
+				result[row][col] = 0
+			}
+		}
+	}
+	return result
+}
