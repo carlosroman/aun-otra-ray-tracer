@@ -152,6 +152,23 @@ func TestIdentityMatrix(t *testing.T) {
 	assert.Equal(t, Get4x4(), Get4x4().Multiply(a))
 }
 
+func TestMatrix_Transpose(t *testing.T) {
+	a := ray.NewMatrix(4, 4)
+	a.SetRow(0, 0, 9, 3, 0)
+	a.SetRow(1, 9, 8, 0, 8)
+	a.SetRow(2, 1, 8, 5, 3)
+	a.SetRow(3, 0, 0, 5, 8)
+
+	expected := ray.NewMatrix(4, 4)
+	expected.SetRow(0, 0, 9, 1, 0)
+	expected.SetRow(1, 9, 8, 8, 0)
+	expected.SetRow(2, 3, 0, 5, 5)
+	expected.SetRow(3, 0, 8, 3, 8)
+
+	assert.Equal(t, expected, a.Transpose())
+	assert.Equal(t, ray.IdentityMatrix(4, 4), ray.IdentityMatrix(4, 4).Transpose())
+}
+
 func TestMatrix_Multiply_4x4_by_4x1(t *testing.T) {
 	a := ray.NewMatrix(4, 4)
 	a.SetRow(0, 1, 2, 3, 4)

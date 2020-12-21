@@ -26,6 +26,16 @@ func (m Matrix) SetRow(row int, vals ...float64) {
 	}
 }
 
+func (m Matrix) Transpose() (result Matrix) {
+	result = NewMatrix(len(m[0]), len(m))
+	for row := range m {
+		for col := range m[row] {
+			result[col][row] = m[row][col]
+		}
+	}
+	return result
+}
+
 func (m Matrix) Multiply(by Matrix) (result Matrix) {
 	result = NewMatrix(len(m), len(by[0]))
 
