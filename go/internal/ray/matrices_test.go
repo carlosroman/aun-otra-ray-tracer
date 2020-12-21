@@ -123,7 +123,6 @@ func TestMatrix_Multiply_4x4_by_4x4(t *testing.T) {
 }
 
 func TestMatrix_Multiply_3x2_by_2x2(t *testing.T) {
-
 	a := ray.NewMatrix(3, 2)
 	a.SetRow(0, 4, 5)
 	a.SetRow(1, 3, 4)
@@ -138,6 +137,21 @@ func TestMatrix_Multiply_3x2_by_2x2(t *testing.T) {
 	expected.SetRow(1, 9, 15)
 	expected.SetRow(2, 3, 7)
 	assert.Equal(t, expected, a.Multiply(b))
+}
+
+func TestMatrix_Multiply_4x4_by_4x1(t *testing.T) {
+	a := ray.NewMatrix(4, 4)
+	a.SetRow(0, 1, 2, 3, 4)
+	a.SetRow(1, 2, 4, 4, 2)
+	a.SetRow(2, 8, 6, 4, 1)
+	a.SetRow(3, 0, 0, 0, 1)
+
+	expected := ray.NewMatrix(4, 1)
+	expected.SetRow(0, 18)
+	expected.SetRow(1, 24)
+	expected.SetRow(2, 33)
+	expected.SetRow(3, 1)
+	assert.Equal(t, expected, a.MultiplyByTuple(1, 2, 3, 1))
 }
 
 func Get4x4() (m ray.Matrix) {

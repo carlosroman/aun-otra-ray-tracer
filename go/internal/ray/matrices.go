@@ -27,10 +27,10 @@ func (m Matrix) SetRow(row int, vals ...float64) {
 }
 
 func (m Matrix) Multiply(by Matrix) (result Matrix) {
-	result = NewMatrix(len(m), len(m[0]))
+	result = NewMatrix(len(m), len(by[0]))
 
-	for row := range m {
-		for col := range m[row] {
+	for row := range result {
+		for col := range result[row] {
 			var val float64
 			for byCol := range by {
 				val = val + (m[row][byCol] * by[byCol][col])
@@ -39,6 +39,15 @@ func (m Matrix) Multiply(by Matrix) (result Matrix) {
 		}
 	}
 	return result
+}
+
+func (m Matrix) MultiplyByTuple(vals ...float64) (result Matrix) {
+	tuple := NewMatrix(len(vals), 1)
+	for i := range vals {
+		tuple[i] = []float64{vals[i]}
+	}
+
+	return m.Multiply(tuple)
 }
 
 func (m Matrix) String() string {
