@@ -1,12 +1,15 @@
 package ray
 
 import (
+	"errors"
 	"fmt"
 )
 
 type Matrix [][]float64
 
 type RowValues []float64
+
+var NonInvertibleErr = errors.New("non-invertible")
 
 func NewMatrix(rows, columns int, rowsValues ...RowValues) Matrix {
 	m := make(Matrix, rows)
@@ -112,12 +115,27 @@ func (m Matrix) Cofactor(row, col int) float64 {
 }
 
 func (m Matrix) MultiplyByTuple(vals ...float64) (result Matrix) {
-	tuple := NewMatrix(len(vals), 1)
+	const colSizeForTuple = 1
+	tuple := NewMatrix(len(vals), colSizeForTuple)
 	for i := range vals {
 		tuple[i] = []float64{vals[i]}
 	}
 
 	return m.Multiply(tuple)
+}
+
+func (m Matrix) Inverse() (result Matrix, err error) {
+	d := m.Determinant()
+	if d == 0 {
+		return nil, NonInvertibleErr
+	}
+	result = NewMatrix(len(m), len(m[0]))
+	for row := range m {
+		for col := range m[row] {
+			result[col][row] = m.Cofactor(row, col) / d
+		}
+	}
+	return result, err
 }
 
 func (m Matrix) String() string {

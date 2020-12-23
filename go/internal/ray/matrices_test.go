@@ -1,9 +1,12 @@
 package ray_test
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
@@ -187,6 +190,111 @@ func TestMatrix_Multiply_4x4_by_4x1(t *testing.T) {
 	assert.Equal(t, expected, a.MultiplyByTuple(1, 2, 3, 1))
 }
 
+func TestMatrix_Inverse(t *testing.T) {
+
+	b := ray.NewMatrix(4, 4,
+		ray.RowValues{8, 2, 2, 2},
+		ray.RowValues{3, -1, 7, 0},
+		ray.RowValues{7, 0, 5, 4},
+		ray.RowValues{6, -2, 0, 5},
+	)
+	bi, err := b.Inverse()
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name     string
+		matrix   ray.Matrix
+		expected ray.Matrix
+		err      error
+	}{
+		{
+			name: "4x4 one",
+			matrix: ray.NewMatrix(4, 4,
+				ray.RowValues{-5, 2, 6, -8},
+				ray.RowValues{1, -5, 1, 8},
+				ray.RowValues{7, 7, -6, -7},
+				ray.RowValues{1, -3, 7, 4},
+			),
+			expected: ray.NewMatrix(4, 4,
+				ray.RowValues{0.21805, 0.45113, 0.24060, -0.04511},
+				ray.RowValues{-0.80827, -1.45677, -0.44361, 0.52068},
+				ray.RowValues{-0.07895, -0.22368, -0.05263, 0.19737},
+				ray.RowValues{-0.52256, -0.81391, -0.30075, 0.30639},
+			),
+		},
+		{
+			name: "4x4 two",
+			matrix: ray.NewMatrix(4, 4,
+				ray.RowValues{8, -5, 9, 2},
+				ray.RowValues{7, 5, 6, 1},
+				ray.RowValues{-6, 0, 9, 6},
+				ray.RowValues{-3, 0, -9, -4},
+			),
+			expected: ray.NewMatrix(4, 4,
+				ray.RowValues{-0.15385, -0.15385, -0.28205, -0.53846},
+				ray.RowValues{-0.07692, 0.12308, 0.02564, 0.03077},
+				ray.RowValues{0.35897, 0.35897, 0.43590, 0.92308},
+				ray.RowValues{-0.69231, -0.69231, -0.76923, -1.92308},
+			),
+		},
+		{
+			name: "4x4 three",
+			matrix: ray.NewMatrix(4, 4,
+				ray.RowValues{9, 3, 0, 9},
+				ray.RowValues{-5, -2, -6, -3},
+				ray.RowValues{-4, 9, 6, 4},
+				ray.RowValues{-7, 6, 6, 2},
+			),
+			expected: ray.NewMatrix(4, 4,
+				ray.RowValues{-0.04074, -0.07778, 0.14444, -0.22222},
+				ray.RowValues{-0.07778, 0.03333, 0.36667, -0.33333},
+				ray.RowValues{-0.02901, -0.14630, -0.10926, 0.12963},
+				ray.RowValues{0.17778, 0.06667, -0.26667, 0.33333},
+			),
+		},
+		{
+			name: "4x4 noninvertible",
+			matrix: ray.NewMatrix(4, 4,
+				ray.RowValues{-4, 2, -2, 3},
+				ray.RowValues{9, 6, 2, 6},
+				ray.RowValues{0, -5, 1, -5},
+				ray.RowValues{0, 0, 0, 0},
+			),
+			err: errors.New("some error"),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual, err := testCase.matrix.Inverse()
+			if testCase.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, "non-invertible")
+				assert.Nil(t, actual)
+				return
+			}
+			require.NoError(t, err)
+			t.Log(fmt.Sprintf("determinant(A): %v", testCase.matrix.Determinant()))
+			t.Log(fmt.Sprintf("cofactor(A, 2, 3): %v", testCase.matrix.Cofactor(2, 3)))
+			t.Log(fmt.Sprintf("cofactor(A, 3, 2): %v", testCase.matrix.Cofactor(3, 2)))
+
+			expected := testCase.expected
+			assertMatrixEqual(t, expected, actual)
+			c := actual.Multiply(b)
+			assertMatrixEqual(t, actual, c.Multiply(bi))
+		})
+	}
+}
+
+func assertMatrixEqual(t *testing.T, expected ray.Matrix, actual ray.Matrix) {
+	assert.Len(t, actual, len(expected))
+	assert.Len(t, actual[0], len(expected[0]))
+	for row := range expected {
+		for col := range expected[row] {
+			assert.InDelta(t, expected[row][col], actual[row][col], 0.00001, fmt.Sprintf("Asserting [%v][%v]", row, col))
+		}
+	}
+}
+
 func TestMatrix_Determinant(t *testing.T) {
 
 	testCases := []struct {
@@ -220,6 +328,16 @@ func TestMatrix_Determinant(t *testing.T) {
 				ray.RowValues{-6, 7, 7, -9},
 			),
 			expected: -4071,
+		},
+		{
+			name: "4x4 noninvertible",
+			matrix: ray.NewMatrix(4, 4,
+				ray.RowValues{-4, 2, -2, 3},
+				ray.RowValues{9, 6, 2, 6},
+				ray.RowValues{0, -5, 1, -5},
+				ray.RowValues{0, 0, 0, 0},
+			),
+			expected: 0,
 		},
 	}
 	for _, testCase := range testCases {
