@@ -56,39 +56,39 @@ func createTestWorld(world scene.World) (object.Object, object.Object) {
 func TestHit(t *testing.T) {
 	testCases := []struct {
 		name      string
-		hitPoints []scene.HitPoint
-		expected  scene.HitPoint
+		hitPoints scene.Intersections
+		expected  scene.Intersection
 	}{
 		{
 			name: "All positive",
-			hitPoints: []scene.HitPoint{{
+			hitPoints: scene.Intersections{{
 				T: 1,
 			}, {
 				T: 2,
 			}, {
 				T: 3,
 			}},
-			expected: scene.HitPoint{T: 1},
+			expected: scene.Intersection{T: 1},
 		},
 		{
 			name: "Some negative and positive",
-			hitPoints: []scene.HitPoint{{
+			hitPoints: scene.Intersections{{
 				T: -1,
 			}, {
 				T: 1,
 			},
 			},
-			expected: scene.HitPoint{T: 1},
+			expected: scene.Intersection{T: 1},
 		},
 		{
 			name: "All negative",
-			hitPoints: []scene.HitPoint{{
+			hitPoints: scene.Intersections{{
 				T: -2,
 			}, {
 				T: -1,
 			},
 			},
-			expected: scene.HitPoint{},
+			expected: scene.Intersection{},
 		},
 	}
 

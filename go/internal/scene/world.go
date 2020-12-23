@@ -30,34 +30,36 @@ func NewWorld() World {
 	}
 }
 
-type HitPoint struct {
+type Intersection struct {
 	T   float64
 	Obj object.Object
 }
 
-func Intersect(w World, r ray.Ray) (intersects []HitPoint) {
+type Intersections []Intersection
+
+func Intersect(w World, r ray.Ray) (intersections Intersections) {
 	for i := range w.Objects() {
 		hits := w.Objects()[i].Intersect(r)
 		for hit := range hits {
-			intersects = append(intersects, HitPoint{
+			intersections = append(intersections, Intersection{
 				T:   hits[hit],
 				Obj: w.Objects()[i],
 			})
 		}
 	}
-	sort.SliceStable(intersects, func(i, j int) bool {
-		return intersects[i].T < intersects[j].T
+	sort.SliceStable(intersections, func(i, j int) bool {
+		return intersections[i].T < intersections[j].T
 	})
-	return intersects
+	return intersections
 }
 
-func Hit(intersects []HitPoint) HitPoint {
-	for i := range intersects {
-		if 0 <= intersects[i].T {
-			return intersects[i]
+func Hit(intersections Intersections) Intersection {
+	for i := range intersections {
+		if 0 <= intersections[i].T {
+			return intersections[i]
 		}
 	}
 	return NoHit
 }
 
-var NoHit = HitPoint{}
+var NoHit = Intersection{}
