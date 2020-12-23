@@ -36,3 +36,11 @@ func Translation(x, y, z float64) Matrix {
 	t[2][3] = z
 	return t
 }
+
+func Scaling(x, y, z float64) Matrix {
+	t := IdentityMatrix(4, 4)
+	t[0][0] = x
+	t[1][1] = y
+	t[2][2] = z
+	return t
+}

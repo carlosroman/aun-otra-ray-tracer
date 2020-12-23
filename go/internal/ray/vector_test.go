@@ -33,3 +33,14 @@ func TestTranslation(t *testing.T) {
 
 	assert.Equal(t, expected, ray.Translation(11, 12, 13))
 }
+
+func TestScaling(t *testing.T) {
+	expected := ray.NewMatrix(4, 4,
+		ray.RowValues{11, 0, 0, 0},
+		ray.RowValues{0, 12, 0, 0},
+		ray.RowValues{0, 0, 13, 0},
+		ray.RowValues{0, 0, 0, 1},
+	)
+
+	assert.Equal(t, expected, ray.Scaling(11, 12, 13))
+}

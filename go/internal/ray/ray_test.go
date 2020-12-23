@@ -59,6 +59,39 @@ func TestRay_Origin(t *testing.T) {
 
 }
 
+func TestRay_Transform(t *testing.T) {
+	getR := func() ray.Ray { return ray.NewRayAt(ray.NewPoint(1, 2, 3), ray.NewVec(0, 1, 0)) }
+	testCases := []struct {
+		name     string
+		m        ray.Matrix
+		expected ray.Ray
+	}{
+		{
+			name: "Translating a ray",
+			m:    ray.Translation(3, 4, 5),
+			expected: ray.NewRayAt(
+				ray.NewPoint(4, 6, 8),
+				ray.NewVec(0, 1, 0)),
+		},
+		{
+			name: "Scaling a ray",
+			m:    ray.Scaling(2, 3, 4),
+			expected: ray.NewRayAt(
+				ray.NewPoint(2, 6, 12),
+				ray.NewVec(0, 3, 0)),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			r := getR()
+			actual := r.Transform(tt.m)
+			assert.Equal(t, tt.expected, actual)
+			assert.Equal(t, getR(), r)
+		})
+	}
+}
+
 func TestRay_PointAt(t *testing.T) {
 	newRayAt := ray.NewRayAt(ray.NewVec(2, 3, 4), ray.NewVec(1, 0, 0))
 

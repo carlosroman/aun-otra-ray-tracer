@@ -38,6 +38,12 @@ func (r ray) RGBA() (red, green, blue, alpha uint32) {
 	return r.color.RGBA()
 }
 
+func (r ray) Transform(transformation Matrix) (transformed Ray) {
+	o := transformation.MultiplyByVector(r.o)
+	d := transformation.MultiplyByVector(r.d)
+	return NewRayAt(o, d)
+}
+
 type Ray interface {
 	color.Color
 	Origin() Vector
@@ -46,6 +52,7 @@ type Ray interface {
 	SetR(redVal uint8)
 	SetG(greenVal uint8)
 	SetB(blueVal uint8)
+	Transform(transformation Matrix) (transformed Ray)
 }
 
 func NewRayAt(point, vector Vector) Ray {
