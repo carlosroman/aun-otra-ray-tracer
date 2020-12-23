@@ -22,3 +22,14 @@ func Test_Cross(t *testing.T) {
 	assertVec(t, ray.NewVec(-1, 2, -1), ray.Cross(a, b))
 	assertVec(t, ray.NewVec(1, -2, 1), ray.Cross(b, a))
 }
+
+func TestTranslation(t *testing.T) {
+	expected := ray.NewMatrix(4, 4,
+		ray.RowValues{1, 0, 0, 11},
+		ray.RowValues{0, 1, 0, 12},
+		ray.RowValues{0, 0, 1, 13},
+		ray.RowValues{0, 0, 0, 1},
+	)
+
+	assert.Equal(t, expected, ray.Translation(11, 12, 13))
+}

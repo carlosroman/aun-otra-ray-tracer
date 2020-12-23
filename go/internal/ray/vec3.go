@@ -5,17 +5,26 @@ import (
 )
 
 type vec3 struct {
-	x, y, z float64
+	x, y, z, w float64
 }
 
 var zero = NewVec(0, 0, 0)
 
-func NewVec(x, y, z float64) Vector {
+func newTuple(x, y, z, w float64) Vector {
 	return vec3{
 		x: x,
 		y: y,
 		z: z,
+		w: w,
 	}
+}
+
+func NewVec(x, y, z float64) Vector {
+	return newTuple(x, y, z, 0)
+}
+
+func NewPoint(x, y, z float64) Vector {
+	return newTuple(x, y, z, 1)
 }
 
 func (v vec3) GetX() float64 {
@@ -28,6 +37,10 @@ func (v vec3) GetY() float64 {
 
 func (v vec3) GetZ() float64 {
 	return v.z
+}
+
+func (v vec3) GetW() float64 {
+	return v.w
 }
 
 func (v vec3) Add(vec Vector) Vector {

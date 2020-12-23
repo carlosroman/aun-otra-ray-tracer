@@ -518,3 +518,44 @@ func TestNewMatrix(t *testing.T) {
 	assert.Equal(t, b, c)
 	assert.Equal(t, a, c)
 }
+
+func TestViewTransform(t *testing.T) {
+	t.Run("The transformation matrix for the default orientation", func(t *testing.T) {
+		from := ray.NewPoint(0, 0, 0)
+		to := ray.NewPoint(0, 0, -1)
+		up := ray.NewVec(0, 1, 0)
+		transform := ray.ViewTransform(from, to, up)
+		assert.Equal(t, ray.IdentityMatrix(4, 4), transform)
+	})
+
+	t.Run("A view transformation matrix looking in positive z direction", func(t *testing.T) {
+		from := ray.NewPoint(0, 0, 0)
+		to := ray.NewPoint(0, 0, 1)
+		up := ray.NewVec(0, 1, 0)
+		transform := ray.ViewTransform(from, to, up)
+		t.Log(transform)
+	})
+
+	t.Run("The view transformation moves the world", func(t *testing.T) {
+		from := ray.NewPoint(0, 0, 8)
+		to := ray.NewPoint(0, 0, 0)
+		up := ray.NewVec(0, 1, 0)
+		transform := ray.ViewTransform(from, to, up)
+		assert.Equal(t, ray.Translation(0, 0, -8), transform)
+
+	})
+
+	t.Run("An arbitrary view transformation", func(t *testing.T) {
+		from := ray.NewPoint(1, 3, 2)
+		to := ray.NewPoint(4, -2, 8)
+		up := ray.NewVec(1, 1, 0)
+		transform := ray.ViewTransform(from, to, up)
+		expected := ray.NewMatrix(4, 4,
+			ray.RowValues{-0.50709, 0.50709, 0.67612, -2.36643},
+			ray.RowValues{0.76772, 0.60609, 0.12122, -2.82843},
+			ray.RowValues{-0.35857, 0.59761, -0.71714, 0.00000},
+			ray.RowValues{0.00000, 0.00000, 0.00000, 1.00000},
+		)
+		assertMatrixEqual(t, expected, transform)
+	})
+}

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
@@ -149,8 +150,47 @@ func Test_vec3_Normalize(t *testing.T) {
 
 }
 
+func TestVec3_Translation(t *testing.T) {
+	transform := ray.Translation(5, -3, 2)
+	p := ray.NewPoint(-3, 4, 5)
+
+	t.Run("Multiplying by a translation matrix", func(t *testing.T) {
+		expected := ray.NewPoint(2, 1, 7)
+		assert.Equal(t, expected, transform.MultiplyByVector(p))
+	})
+
+	t.Run("Multiplying by the inverse of a translation matrix", func(t *testing.T) {
+		inv, err := transform.Inverse()
+		require.NoError(t, err)
+		expected := ray.NewPoint(-8, 7, 3)
+		assert.Equal(t, expected, inv.MultiplyByVector(p))
+
+	})
+
+	t.Run("Translation does not affect vectors", func(t *testing.T) {
+		v := ray.NewVec(-3, 4, 5)
+		assert.Equal(t, v, transform.MultiplyByVector(v))
+	})
+}
+
 func assertVec(t *testing.T, expected, actual ray.Vector) {
 	assert.InDelta(t, expected.GetX(), actual.GetX(), 0.00001)
 	assert.InDelta(t, expected.GetY(), actual.GetY(), 0.00001)
 	assert.InDelta(t, expected.GetZ(), actual.GetZ(), 0.00001)
+}
+
+func TestNewPoint(t *testing.T) {
+	point := ray.NewPoint(11, 12, 13)
+	assert.Equal(t, float64(11), point.GetX())
+	assert.Equal(t, float64(12), point.GetY())
+	assert.Equal(t, float64(13), point.GetZ())
+	assert.Equal(t, float64(1), point.GetW())
+}
+
+func TestNewVec(t *testing.T) {
+	vector := ray.NewVec(11, 12, 13)
+	assert.Equal(t, float64(11), vector.GetX())
+	assert.Equal(t, float64(12), vector.GetY())
+	assert.Equal(t, float64(13), vector.GetZ())
+	assert.Equal(t, float64(0), vector.GetW())
 }

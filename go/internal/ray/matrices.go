@@ -124,6 +124,11 @@ func (m Matrix) MultiplyByTuple(vals ...float64) (result Matrix) {
 	return m.Multiply(tuple)
 }
 
+func (m Matrix) MultiplyByVector(vec Vector) (result Vector) {
+	mt := m.MultiplyByTuple(vec.GetX(), vec.GetY(), vec.GetZ(), vec.GetW())
+	return newTuple(mt[0][0], mt[1][0], mt[2][0], mt[3][0])
+}
+
 func (m Matrix) Inverse() (result Matrix, err error) {
 	d := m.Determinant()
 	if d == 0 {
@@ -163,4 +168,18 @@ func IdentityMatrix(rows, cols int) (result Matrix) {
 		}
 	}
 	return result
+}
+
+func ViewTransform(from, to, up Vector) (result Matrix) {
+	fwd := to.Subtract(from).Normalize()
+	upN := up.Normalize()
+	left := Cross(fwd, upN)
+	trueUp := Cross(left, fwd)
+	orientation := NewMatrix(4, 4,
+		RowValues{left.GetX(), left.GetY(), left.GetZ(), 0},
+		RowValues{trueUp.GetX(), trueUp.GetY(), trueUp.GetZ(), 0},
+		RowValues{-fwd.GetX(), -fwd.GetY(), -fwd.GetZ(), 0},
+		RowValues{0, 0, 0, 1},
+	)
+	return orientation.Multiply(Translation(-from.GetX(), -from.GetY(), -from.GetZ()))
 }
