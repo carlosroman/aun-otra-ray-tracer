@@ -1,13 +1,22 @@
 package ray
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Matrix [][]float64
 
-func NewMatrix(rows, columns int) Matrix {
+type RowValues []float64
+
+func NewMatrix(rows, columns int, rowsValues ...RowValues) Matrix {
 	m := make(Matrix, rows)
 	for r := 0; r < rows; r++ {
 		m[r] = make([]float64, columns)
+	}
+	for r := range rowsValues {
+		for i := range rowsValues[r] {
+			m[r][i] = rowsValues[r][i]
+		}
 	}
 	return m
 }
@@ -49,6 +58,57 @@ func (m Matrix) Multiply(by Matrix) (result Matrix) {
 		}
 	}
 	return result
+}
+
+func (m Matrix) Determinant() float64 {
+	if len(m) == 2 && len(m[0]) == 2 {
+		return (m[0][0] * m[1][1]) - (m[0][1] * m[1][0])
+	}
+
+	var res float64
+	for col := range m[0] {
+		c := m.Cofactor(0, col)
+		res = res + (m[0][col] * c)
+	}
+
+	return res
+}
+
+func (m Matrix) SubMatrix(row, col int) (result Matrix) {
+	result = NewMatrix(len(m)-1, len(m[0])-1)
+	for r := range m {
+		if r == row {
+			continue
+		}
+		currentRow := r
+		if currentRow > row {
+			currentRow--
+		}
+		for c := range m[r] {
+			if c == col {
+				continue
+			}
+			currentCol := c
+			if currentCol > col {
+				currentCol--
+			}
+			result[currentRow][currentCol] = m[r][c]
+		}
+	}
+	return result
+}
+
+func (m Matrix) Minor(row, col int) float64 {
+	return m.
+		SubMatrix(row, col).
+		Determinant()
+}
+
+func (m Matrix) Cofactor(row, col int) float64 {
+	if (row+col)%2 == 0 {
+		return m.Minor(row, col)
+	}
+	return -m.Minor(row, col)
 }
 
 func (m Matrix) MultiplyByTuple(vals ...float64) (result Matrix) {

@@ -113,11 +113,12 @@ func TestMatrix_Multiply_4x4_by_4x4(t *testing.T) {
 	b.SetRow(2, 4, 3, 6, 5)
 	b.SetRow(3, 1, 2, 7, 8)
 
-	expected := ray.NewMatrix(4, 4)
-	expected.SetRow(0, 20, 22, 50, 48)
-	expected.SetRow(1, 44, 54, 114, 108)
-	expected.SetRow(2, 40, 58, 110, 102)
-	expected.SetRow(3, 16, 26, 46, 42)
+	expected := ray.NewMatrix(4, 4,
+		ray.RowValues{20, 22, 50, 48},
+		ray.RowValues{44, 54, 114, 108},
+		ray.RowValues{40, 58, 110, 102},
+		ray.RowValues{16, 26, 46, 42},
+	)
 
 	assert.Equal(t, expected, a.Multiply(b))
 }
@@ -170,18 +171,191 @@ func TestMatrix_Transpose(t *testing.T) {
 }
 
 func TestMatrix_Multiply_4x4_by_4x1(t *testing.T) {
-	a := ray.NewMatrix(4, 4)
-	a.SetRow(0, 1, 2, 3, 4)
-	a.SetRow(1, 2, 4, 4, 2)
-	a.SetRow(2, 8, 6, 4, 1)
-	a.SetRow(3, 0, 0, 0, 1)
+	a := ray.NewMatrix(4, 4,
+		ray.RowValues{1, 2, 3, 4},
+		ray.RowValues{2, 4, 4, 2},
+		ray.RowValues{8, 6, 4, 1},
+		ray.RowValues{0, 0, 0, 1},
+	)
 
-	expected := ray.NewMatrix(4, 1)
-	expected.SetRow(0, 18)
-	expected.SetRow(1, 24)
-	expected.SetRow(2, 33)
-	expected.SetRow(3, 1)
+	expected := ray.NewMatrix(4, 1,
+		ray.RowValues{18},
+		ray.RowValues{24},
+		ray.RowValues{33},
+		ray.RowValues{1},
+	)
 	assert.Equal(t, expected, a.MultiplyByTuple(1, 2, 3, 1))
+}
+
+func TestMatrix_Determinant(t *testing.T) {
+
+	testCases := []struct {
+		name     string
+		matrix   ray.Matrix
+		expected float64
+	}{
+		{
+			name: "2x2",
+			matrix: ray.NewMatrix(2, 2,
+				ray.RowValues{1, 5},
+				ray.RowValues{-3, 2},
+			),
+			expected: 17,
+		},
+		{
+			name: "3x3",
+			matrix: ray.NewMatrix(3, 3,
+				ray.RowValues{1, 2, 6},
+				ray.RowValues{-5, 8, -4},
+				ray.RowValues{2, 6, 4},
+			),
+			expected: -196,
+		},
+		{
+			name: "4x4",
+			matrix: ray.NewMatrix(4, 4,
+				ray.RowValues{-2, -8, 3, 5},
+				ray.RowValues{-3, 1, 7, 3},
+				ray.RowValues{1, 2, -9, 6},
+				ray.RowValues{-6, 7, 7, -9},
+			),
+			expected: -4071,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expected, testCase.matrix.Determinant())
+		})
+	}
+}
+
+func TestMatrix_Minor(t *testing.T) {
+	type args struct {
+		row int
+		col int
+	}
+	testCases := []struct {
+		name     string
+		args     args
+		matrix   ray.Matrix
+		expected float64
+	}{
+		{
+			name: "Calculating a minor of a 3x3 matrix",
+			args: args{
+				row: 1,
+				col: 0,
+			},
+			matrix: ray.NewMatrix(3, 3,
+				ray.RowValues{3, 5, 0},
+				ray.RowValues{2, -1, -7},
+				ray.RowValues{6, -1, 5},
+			),
+			expected: 25,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			b := testCase.matrix.SubMatrix(testCase.args.row, testCase.args.col)
+			assert.Equal(t,
+				testCase.expected,
+				testCase.matrix.Minor(testCase.args.row, testCase.args.col), "Did not match expected")
+			assert.Equal(t,
+				b.Determinant(),
+				testCase.matrix.Minor(testCase.args.row, testCase.args.col), "Did not equal determinant of the sub-matrix")
+		})
+	}
+}
+
+func TestMatrix_Cofactor(t *testing.T) {
+	a := ray.NewMatrix(3, 3,
+		ray.RowValues{3, 5, 0},
+		ray.RowValues{2, -1, -7},
+		ray.RowValues{6, -1, 5},
+	)
+
+	assert.Equal(t, float64(-12), a.Minor(0, 0))
+	assert.Equal(t, float64(-12), a.Cofactor(0, 0))
+
+	assert.Equal(t, float64(25), a.Minor(1, 0))
+	assert.Equal(t, float64(-25), a.Cofactor(1, 0))
+}
+
+func TestMatrix_SubMatrix(t *testing.T) {
+	type args struct {
+		row int
+		col int
+	}
+	testCases := []struct {
+		name     string
+		args     args
+		matrix   func() ray.Matrix
+		expected ray.Matrix
+	}{
+		{
+			name: "A sub-matrix of a 3x3 matrix is a 2x2 matrix",
+			args: args{
+				row: 0,
+				col: 2,
+			},
+			matrix: func() ray.Matrix {
+				return ray.NewMatrix(3, 3,
+					ray.RowValues{1, 5, 0},
+					ray.RowValues{-3, 2, 7},
+					ray.RowValues{0, 6, -3},
+				)
+			},
+			expected: ray.NewMatrix(2, 2,
+				ray.RowValues{-3, 2},
+				ray.RowValues{0, 6},
+			),
+		},
+		{
+			name: "A sub-matrix of a 3x3 removing first col",
+			args: args{
+				row: 1,
+				col: 0,
+			},
+			matrix: func() ray.Matrix {
+				return ray.NewMatrix(3, 3,
+					ray.RowValues{3, 5, 0},
+					ray.RowValues{2, -1, -7},
+					ray.RowValues{6, -1, 5},
+				)
+			},
+			expected: ray.NewMatrix(2, 2,
+				ray.RowValues{5, 0},
+				ray.RowValues{-1, 5},
+			),
+		},
+		{
+			name: "A sub-matrix of a 4x4 matrix is a 3x3 matrix",
+			args: args{
+				row: 2,
+				col: 1,
+			},
+			matrix: func() ray.Matrix {
+				return ray.NewMatrix(4, 4,
+					ray.RowValues{-6, 1, 1, 6},
+					ray.RowValues{-8, 5, 8, 6},
+					ray.RowValues{-1, 0, 8, 2},
+					ray.RowValues{-7, 1, -1, 1},
+				)
+			},
+			expected: ray.NewMatrix(3, 3,
+				ray.RowValues{-6, 1, 6},
+				ray.RowValues{-8, 8, 6},
+				ray.RowValues{-7, -1, 1},
+			),
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			matrix := testCase.matrix()
+			assert.Equal(t, testCase.expected, matrix.SubMatrix(testCase.args.row, testCase.args.col), "SubMatrix matches")
+			assert.Equal(t, testCase.matrix(), matrix, "Original matrix not altered")
+		})
+	}
 }
 
 func Get4x4() (m ray.Matrix) {
@@ -204,4 +378,25 @@ func Get4x4() (m ray.Matrix) {
 		}
 	}
 	return
+}
+
+func TestNewMatrix(t *testing.T) {
+	a := ray.NewMatrix(2, 2)
+	a.SetRow(0, 1, 2)
+	a.SetRow(1, 3, 4)
+
+	b := ray.NewMatrix(2, 2,
+		ray.RowValues{1, 2},
+		ray.RowValues{3, 4},
+	)
+
+	c := ray.NewMatrix(2, 2)
+	c[0][0] = 1
+	c[0][1] = 2
+	c[1][0] = 3
+	c[1][1] = 4
+
+	assert.Equal(t, a, b)
+	assert.Equal(t, b, c)
+	assert.Equal(t, a, c)
 }
