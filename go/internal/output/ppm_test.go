@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"testing"
 
@@ -106,7 +107,7 @@ func TestPPMWriter(t *testing.T) {
 	dir, err := ioutil.TempDir("", "TestPPMWriter")
 	require.NoError(t, err)
 	defer func() {
-		//_ = os.RemoveAll(dir)
+		_ = os.RemoveAll(dir)
 	}()
 
 	for i := range testImages {
