@@ -30,7 +30,7 @@ func Cross(a, b Vector) Vector {
 }
 
 func Translation(x, y, z float64) Matrix {
-	t := IdentityMatrix(4, 4)
+	t := IdentityMatrix(defaultIdentityMatrixSize, defaultIdentityMatrixSize)
 	t[0][3] = x
 	t[1][3] = y
 	t[2][3] = z
@@ -38,7 +38,7 @@ func Translation(x, y, z float64) Matrix {
 }
 
 func Scaling(x, y, z float64) Matrix {
-	t := IdentityMatrix(4, 4)
+	t := IdentityMatrix(defaultIdentityMatrixSize, defaultIdentityMatrixSize)
 	t[0][0] = x
 	t[1][1] = y
 	t[2][2] = z

@@ -1,15 +1,12 @@
 package ray
 
 import (
-	"errors"
 	"fmt"
 )
 
 type Matrix [][]float64
 
 type RowValues []float64
-
-var NonInvertibleErr = errors.New("non-invertible")
 
 func NewMatrix(rows, columns int, rowsValues ...RowValues) Matrix {
 	m := make(Matrix, rows)
@@ -155,19 +152,23 @@ func (m Matrix) String() string {
 	return s
 }
 
-func IdentityMatrix(rows, cols int) (result Matrix) {
-	result = NewMatrix(rows, cols)
+func DefaultIdentityMatrix() (identityMatrix Matrix) {
+	return IdentityMatrix(defaultIdentityMatrixSize, defaultIdentityMatrixSize)
+}
 
-	for row := range result {
-		for col := range result[row] {
+func IdentityMatrix(rows, cols int) (identityMatrix Matrix) {
+	identityMatrix = NewMatrix(rows, cols)
+
+	for row := range identityMatrix {
+		for col := range identityMatrix[row] {
 			if col == row {
-				result[row][col] = 1
+				identityMatrix[row][col] = 1
 			} else {
-				result[row][col] = 0
+				identityMatrix[row][col] = 0
 			}
 		}
 	}
-	return result
+	return identityMatrix
 }
 
 func ViewTransform(from, to, up Vector) (result Matrix) {

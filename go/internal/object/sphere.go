@@ -9,24 +9,31 @@ import (
 type Object interface {
 	Intersect(ray ray.Ray) []float64
 	NormalAt(point ray.Vector) ray.Vector
+	Transform() ray.Matrix
+	SetTransform(t ray.Matrix)
 }
 
 type sphere struct {
 	c ray.Vector
 	r float64
+	t ray.Matrix
 }
 
 func (s sphere) NormalAt(point ray.Vector) ray.Vector {
 	return point.Subtract(s.c).Normalize()
 }
 
-func (s sphere) Intersect(r ray.Ray) []float64 {
+func (s sphere) Intersect(rr ray.Ray) []float64 {
+	inv, err := s.t.Inverse()
+	if err != nil {
+		return nil
+	}
+	r := rr.Transform(inv)
 	sphereToRay := r.Origin().Subtract(s.c)
 	a := ray.Dot(r.Direction(), r.Direction())
-	b := 2 * ray.Dot(sphereToRay, r.Direction())
+	b := 2 * ray.Dot(r.Direction(), sphereToRay)
 	c := ray.Dot(sphereToRay, sphereToRay) - (s.r * s.r)
 	discriminant := (b * b) - (4 * a * c)
-
 	if discriminant < 0 {
 		return nil
 	}
@@ -39,9 +46,18 @@ func (s sphere) Intersect(r ray.Ray) []float64 {
 	return []float64{t1, t2}
 }
 
+func (s sphere) Transform() ray.Matrix {
+	return s.t
+}
+
+func (s *sphere) SetTransform(t ray.Matrix) {
+	s.t = t
+}
+
 func NewSphere(center ray.Vector, radius float64) Object {
 	return &sphere{
 		c: center,
 		r: radius,
+		t: ray.DefaultIdentityMatrix(),
 	}
 }
