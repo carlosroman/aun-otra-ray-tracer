@@ -12,3 +12,11 @@ var (
 	Zero             = NewVec(0, 0, 0)
 	NonInvertibleErr = errors.New("non-invertible")
 )
+
+type Axis int
+
+const (
+	X Axis = iota
+	Y
+	Z
+)

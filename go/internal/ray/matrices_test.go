@@ -3,6 +3,7 @@ package ray_test
 import (
 	"errors"
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -558,4 +559,96 @@ func TestViewTransform(t *testing.T) {
 		)
 		assertMatrixEqual(t, expected, transform)
 	})
+}
+
+func TestRotation(t *testing.T) {
+	type args struct {
+		by      float64
+		axis    ray.Axis
+		inverse bool
+	}
+	testCases := []struct {
+		name     string
+		args     args
+		point    ray.Vector
+		expected ray.Vector
+	}{
+		{
+			name: "x half quarter",
+			args: args{
+				by:   math.Pi / 4,
+				axis: ray.X,
+			},
+			point:    ray.NewPoint(0, 1, 0),
+			expected: ray.NewPoint(0, math.Sqrt(2)/2, math.Sqrt(2)/2),
+		},
+		{
+			name: "x full quarter",
+			args: args{
+				by:   math.Pi / 2,
+				axis: ray.X,
+			},
+			point:    ray.NewPoint(0, 1, 0),
+			expected: ray.NewPoint(0, 0, 1),
+		},
+		{
+			name: "x half quarter inverse",
+			args: args{
+				by:      math.Pi / 4,
+				axis:    ray.X,
+				inverse: true,
+			},
+			point:    ray.NewPoint(0, 1, 0),
+			expected: ray.NewPoint(0, math.Sqrt(2)/2, -math.Sqrt(2)/2),
+		},
+		{
+			name: "y half quarter",
+			args: args{
+				by:   math.Pi / 4,
+				axis: ray.Y,
+			},
+			point:    ray.NewPoint(0, 0, 1),
+			expected: ray.NewPoint(math.Sqrt(2)/2, 0, math.Sqrt(2)/2),
+		},
+		{
+			name: "y full quarter",
+			args: args{
+				by:   math.Pi / 2,
+				axis: ray.Y,
+			},
+			point:    ray.NewPoint(0, 0, 1),
+			expected: ray.NewPoint(1, 0, 0),
+		},
+		{
+			name: "z half quarter",
+			args: args{
+				by:   math.Pi / 4,
+				axis: ray.Z,
+			},
+			point:    ray.NewPoint(0, 1, 0),
+			expected: ray.NewPoint(-math.Sqrt(2)/2, math.Sqrt(2)/2, 0),
+		},
+		{
+			name: "z full quarter",
+			args: args{
+				by:   math.Pi / 2,
+				axis: ray.Z,
+			},
+			point:    ray.NewPoint(0, 1, 0),
+			expected: ray.NewPoint(-1, 0, 0),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			rotation := ray.Rotation(tt.args.axis, tt.args.by)
+			var err error
+			if tt.args.inverse {
+				rotation, err = rotation.Inverse()
+				require.NoError(t, err)
+			}
+			actual := rotation.MultiplyByVector(tt.point)
+			assertVec(t, tt.expected, actual)
+		})
+	}
 }

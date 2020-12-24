@@ -2,6 +2,7 @@ package ray
 
 import (
 	"fmt"
+	"math"
 )
 
 type Matrix [][]float64
@@ -138,6 +139,30 @@ func (m Matrix) Inverse() (result Matrix, err error) {
 		}
 	}
 	return result, err
+}
+
+func Rotation(axis Axis, by float64) (rotation Matrix) {
+	rotation = DefaultIdentityMatrix()
+	cosBy := math.Cos(by)
+	sinBy := math.Sin(by)
+	switch axis {
+	case X:
+		rotation[1][1] = cosBy
+		rotation[1][2] = -sinBy
+		rotation[2][1] = sinBy
+		rotation[2][2] = cosBy
+	case Y:
+		rotation[0][0] = cosBy
+		rotation[0][2] = sinBy
+		rotation[2][0] = -sinBy
+		rotation[2][2] = cosBy
+	case Z:
+		rotation[0][0] = cosBy
+		rotation[0][1] = -sinBy
+		rotation[1][0] = sinBy
+		rotation[1][1] = cosBy
+	}
+	return rotation
 }
 
 func (m Matrix) String() string {
