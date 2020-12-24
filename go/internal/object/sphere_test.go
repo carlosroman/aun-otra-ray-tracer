@@ -97,41 +97,66 @@ func TestNewSphere(t *testing.T) {
 func TestSphere_NormalAt(t *testing.T) {
 
 	testCases := []struct {
-		name     string
-		point    ray.Vector
-		sphere   object.Object
-		expected ray.Vector
+		name      string
+		point     ray.Vector
+		sphere    object.Object
+		expected  ray.Vector
+		transform ray.Matrix
 	}{
 		{
 			name:     "X axis",
-			point:    ray.NewVec(1, 0, 0),
+			point:    ray.NewPoint(1, 0, 0),
 			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected: ray.NewVec(1, 0, 0),
 		},
 		{
 			name:     "Y axis",
-			point:    ray.NewVec(0, 1, 0),
+			point:    ray.NewPoint(0, 1, 0),
 			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected: ray.NewVec(0, 1, 0),
 		},
 		{
 			name:     "Z axis",
-			point:    ray.NewVec(0, 0, 1),
+			point:    ray.NewPoint(0, 0, 1),
 			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected: ray.NewVec(0, 0, 1),
 		},
 		{
 			name:     "nonaxial",
-			point:    ray.NewVec(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
+			point:    ray.NewPoint(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
 			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected: ray.NewVec(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
+		},
+		{
+			name:      "translation",
+			point:     ray.NewPoint(0, 1.70711, -0.70711),
+			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			expected:  ray.NewVec(0, 0.70711, -0.70711),
+			transform: ray.Translation(0, 1, 0),
+		},
+		{
+			name:      "transformed",
+			point:     ray.NewPoint(0, math.Sqrt(2)/2, -math.Sqrt(2)/2),
+			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			expected:  ray.NewVec(0, 0.97014, -0.24254),
+			transform: ray.Scaling(1, 0.5, 1).Multiply(ray.Rotation(ray.Z, math.Pi/5)),
 		},
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.transform != nil {
+				tt.sphere.SetTransform(tt.transform)
+			}
 			actual := tt.sphere.NormalAt(tt.point)
-			assert.Equal(t, tt.expected, actual)
-			assert.Equal(t, tt.expected, actual.Normalize())
+			assertVec(t, tt.expected, actual)
+			assertVec(t, tt.expected, actual.Normalize())
 		})
 	}
+}
+
+func assertVec(t *testing.T, expected, actual ray.Vector) {
+	assert.InDelta(t, expected.GetX(), actual.GetX(), 0.00001, "X did not match")
+	assert.InDelta(t, expected.GetY(), actual.GetY(), 0.00001, "Y did not match")
+	assert.InDelta(t, expected.GetZ(), actual.GetZ(), 0.00001, "Z did not match")
+	assert.InDelta(t, expected.GetW(), actual.GetW(), 0.00001, "W did not match")
 }

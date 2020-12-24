@@ -19,8 +19,17 @@ type sphere struct {
 	t ray.Matrix
 }
 
-func (s sphere) NormalAt(point ray.Vector) ray.Vector {
-	return point.Subtract(s.c).Normalize()
+func (s sphere) NormalAt(worldPoint ray.Vector) ray.Vector {
+	inv, err := s.t.Inverse()
+	if err != nil {
+		return nil
+	}
+	objPt := inv.MultiplyByVector(worldPoint)
+	objN := objPt.Subtract(s.c)
+	return inv.
+		Transpose().
+		MultiplyByVector(objN).
+		Normalize()
 }
 
 func (s sphere) Intersect(rr ray.Ray) []float64 {
