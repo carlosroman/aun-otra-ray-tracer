@@ -13,6 +13,7 @@ func Test_Dot(t *testing.T) {
 	b := ray.NewVec(2, 3, 4)
 	actual := ray.Dot(a, b)
 	assert.Equal(t, float64(20), actual)
+	assert.Equal(t, float64(20), a.Dot(b))
 }
 
 func Test_Cross(t *testing.T) {

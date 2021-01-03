@@ -22,14 +22,46 @@ func Test_vec3_Add(t *testing.T) {
 }
 
 func Test_vec3_Subtract(t *testing.T) {
-	v1 := ray.NewVec(3, 2, 1)
-	v2 := ray.NewVec(5, 6, 7)
+	testCases := []struct {
+		name     string
+		tp1      ray.Vector
+		tp2      ray.Vector
+		expected ray.Vector
+	}{
+		{
+			name:     "two points",
+			tp1:      ray.NewVec(3, 2, 1),
+			tp2:      ray.NewVec(5, 6, 7),
+			expected: ray.NewVec(-2, -4, -6),
+		},
+		{
+			name:     "vector from a point",
+			tp1:      ray.NewPoint(3, 2, 1),
+			tp2:      ray.NewVec(5, 6, 7),
+			expected: ray.NewPoint(-2, -4, -6),
+		},
+		{
+			name:     "two vectors",
+			tp1:      ray.NewVec(3, 2, 1),
+			tp2:      ray.NewVec(5, 6, 7),
+			expected: ray.NewVec(-2, -4, -6),
+		},
+		{
+			name:     "zero vector",
+			tp1:      ray.Zero,
+			tp2:      ray.NewVec(1, -2, 3),
+			expected: ray.NewVec(-1, 2, -3),
+		},
+	}
 
-	actual := v1.Subtract(v2)
-	assert.NotNil(t, actual)
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.tp1.Subtract(tt.tp2)
+			assert.NotNil(t, actual)
+			assertVec(t, tt.expected, actual)
+		})
+	}
 
-	expected := ray.NewVec(-2, -4, -6)
-	assertVec(t, expected, actual)
 }
 
 func Test_vec3_Negate(t *testing.T) {
@@ -123,7 +155,7 @@ func Test_vec3_Divide(t *testing.T) {
 	assertVec(t, expected, actual)
 }
 
-func Test_vec3_Normalize(t *testing.T) {
+func Test_vec3_sub(t *testing.T) {
 	testCases := []struct {
 		name     string
 		v        ray.Vector
@@ -174,9 +206,10 @@ func TestVec3_Translation(t *testing.T) {
 }
 
 func assertVec(t *testing.T, expected, actual ray.Vector) {
-	assert.InDelta(t, expected.GetX(), actual.GetX(), 0.00001)
-	assert.InDelta(t, expected.GetY(), actual.GetY(), 0.00001)
-	assert.InDelta(t, expected.GetZ(), actual.GetZ(), 0.00001)
+	assert.InDelta(t, expected.GetX(), actual.GetX(), 0.00001, "X")
+	assert.InDelta(t, expected.GetY(), actual.GetY(), 0.00001, "Y")
+	assert.InDelta(t, expected.GetZ(), actual.GetZ(), 0.00001, "Z")
+	assert.InDelta(t, expected.GetW(), actual.GetW(), 0.00001, "W")
 }
 
 func TestNewPoint(t *testing.T) {
@@ -193,4 +226,45 @@ func TestNewVec(t *testing.T) {
 	assert.Equal(t, float64(12), vector.GetY())
 	assert.Equal(t, float64(13), vector.GetZ())
 	assert.Equal(t, float64(0), vector.GetW())
+}
+
+func TestVec3_Reflect(t *testing.T) {
+	testCases := []struct {
+		name     string
+		v        ray.Vector
+		normal   ray.Vector
+		expected ray.Vector
+	}{
+		{
+			name:     "45°",
+			v:        ray.NewVec(1, -1, 0),
+			normal:   ray.NewVec(0, 1, 0),
+			expected: ray.NewVec(1, 1, 0),
+		},
+		{
+			name:     "slanted",
+			v:        ray.NewVec(0, -1, 0),
+			normal:   ray.NewVec(math.Sqrt(2)/2, math.Sqrt(2)/2, 0),
+			expected: ray.NewVec(1, 0, 0),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.v.Reflect(tt.normal)
+			assertVec(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestVec3_Multiplied(t *testing.T) {
+	given := ray.NewMatrix(4, 4,
+		ray.RowValues{1, 2, 3, 4},
+		ray.RowValues{2, 4, 4, 2},
+		ray.RowValues{8, 6, 4, 1},
+		ray.RowValues{0, 0, 0, 1},
+	)
+	and := ray.NewPoint(1, 2, 3)
+	expected := ray.NewPoint(18, 24, 33)
+	assert.Equal(t, expected, and.Multiplied(given))
 }

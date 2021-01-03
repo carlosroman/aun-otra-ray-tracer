@@ -8,7 +8,7 @@ import (
 
 type Object interface {
 	Intersect(ray ray.Ray) []float64
-	NormalAt(point ray.Vector) ray.Vector
+	NormalAt(worldPoint ray.Vector) ray.Vector
 	Transform() ray.Matrix
 	SetTransform(t ray.Matrix)
 }
@@ -29,6 +29,7 @@ func (s sphere) NormalAt(worldPoint ray.Vector) ray.Vector {
 	return inv.
 		Transpose().
 		MultiplyByVector(objN).
+		SetW(0).
 		Normalize()
 }
 

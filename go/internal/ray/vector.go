@@ -4,22 +4,30 @@ type Point Vector
 
 type Vector interface {
 	GetX() float64
+	SetX(x float64) Vector
 	GetY() float64
+	SetY(y float64) Vector
 	GetZ() float64
+	SetZ(z float64) Vector
 	GetW() float64
+	SetW(w float64) Vector
 	Multiply(by float64) Vector
+	Multiplied(by Matrix) Vector
 	Add(vec Vector) Vector
 	Divide(by float64) Vector
 	Subtract(vec Vector) Vector
 	Magnitude() float64
 	Normalize() Vector
 	Negate() Vector
+	Reflect(normal Vector) Vector
+	Dot(n Vector) float64
 }
 
 func Dot(a, b Vector) float64 {
 	return (a.GetX() * b.GetX()) +
 		(a.GetY() * b.GetY()) +
-		(a.GetZ() * b.GetZ())
+		(a.GetZ() * b.GetZ()) +
+		(a.GetW() * b.GetW())
 }
 
 func Cross(a, b Vector) Vector {
