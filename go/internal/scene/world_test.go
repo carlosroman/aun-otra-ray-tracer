@@ -24,10 +24,19 @@ func TestWorld_AddObject(t *testing.T) {
 	assert.Contains(t, world.Objects(), s2)
 }
 
+func TestWorld_AddObjects(t *testing.T) {
+	world := scene.NewWorld()
+	s1, s2 := createTestWorld(scene.NewWorld())
+	world.AddObjects(s1, s2)
+	assert.Len(t, world.Objects(), 2)
+	assert.Contains(t, world.Objects(), s1)
+	assert.Contains(t, world.Objects(), s2)
+}
+
 func TestIntersect(t *testing.T) {
 	world := scene.NewWorld()
 	s1, s2 := createTestWorld(world)
-	r := ray.NewRayAt(ray.NewVec(0, 0, -5), ray.NewVec(0, 0, 1))
+	r := ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1))
 	intersects := scene.Intersect(world, r)
 	require.NotEmpty(t, intersects)
 	require.Len(t, intersects, 4)
@@ -46,9 +55,9 @@ func TestIntersect(t *testing.T) {
 }
 
 func createTestWorld(world scene.World) (object.Object, object.Object) {
-	s1 := object.NewSphere(ray.Zero, 1)
+	s1 := object.NewSphere(ray.ZeroPoint, 1)
 	world.AddObject(s1)
-	s2 := object.NewSphere(ray.Zero, 0.5)
+	s2 := object.NewSphere(ray.ZeroPoint, 0.5)
 	world.AddObject(s2)
 	return s1, s2
 }

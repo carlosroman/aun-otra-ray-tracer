@@ -30,8 +30,8 @@ func Test_vec3_Subtract(t *testing.T) {
 	}{
 		{
 			name:     "two points",
-			tp1:      ray.NewVec(3, 2, 1),
-			tp2:      ray.NewVec(5, 6, 7),
+			tp1:      ray.NewPoint(3, 2, 1),
+			tp2:      ray.NewPoint(5, 6, 7),
 			expected: ray.NewVec(-2, -4, -6),
 		},
 		{
@@ -48,7 +48,7 @@ func Test_vec3_Subtract(t *testing.T) {
 		},
 		{
 			name:     "zero vector",
-			tp1:      ray.Zero,
+			tp1:      ray.ZeroVector,
 			tp2:      ray.NewVec(1, -2, 3),
 			expected: ray.NewVec(-1, 2, -3),
 		},

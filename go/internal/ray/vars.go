@@ -9,7 +9,8 @@ const (
 )
 
 var (
-	Zero             = NewVec(0, 0, 0)
+	ZeroVector       = NewVec(0, 0, 0)
+	ZeroPoint        = NewPoint(0, 0, 0)
 	NonInvertibleErr = errors.New("non-invertible")
 )
 

@@ -10,6 +10,7 @@ import (
 type World interface {
 	Objects() []object.Object
 	AddObject(obj object.Object)
+	AddObjects(objs ...object.Object)
 }
 
 type world struct {
@@ -22,6 +23,12 @@ func (w world) Objects() []object.Object {
 
 func (w *world) AddObject(obj object.Object) {
 	w.objs = append(w.objs, obj)
+}
+
+func (w *world) AddObjects(objs ...object.Object) {
+	for _, obj := range objs {
+		w.objs = append(w.objs, obj)
+	}
 }
 
 func NewWorld() World {
