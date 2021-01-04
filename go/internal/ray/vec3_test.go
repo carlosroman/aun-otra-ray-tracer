@@ -2,6 +2,7 @@ package ray_test
 
 import (
 	"math"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,45 @@ func Test_vec3_Add(t *testing.T) {
 
 	expected := ray.NewVec(1, 1, 6)
 	assertVec(t, expected, actual)
+}
+
+func TestVec3_Set(t *testing.T) {
+	testVec := ray.NewVec(4, 3, 2)
+	testCases := []struct {
+		name     string
+		set      func(val float64) ray.Vector
+		expected float64
+	}{
+		{
+			name:     "X",
+			set:      testVec.SetX,
+			expected: 123,
+		},
+		{
+			name:     "Y",
+			set:      testVec.SetY,
+			expected: 114,
+		},
+		{
+			name:     "Z",
+			set:      testVec.SetZ,
+			expected: 118,
+		},
+		{
+			name:     "W",
+			set:      testVec.SetW,
+			expected: 321,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.set(tt.expected)
+			assert.NotEqual(t, testVec, actual)
+			actualVal := reflect.ValueOf(actual).MethodByName("Get" + tt.name).Call([]reflect.Value{})
+			assert.Equal(t, tt.expected, actualVal[0].Float())
+		})
+	}
 }
 
 func Test_vec3_Subtract(t *testing.T) {
