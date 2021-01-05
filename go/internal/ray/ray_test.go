@@ -1,7 +1,6 @@
 package ray_test
 
 import (
-	"fmt"
 	"image"
 	"testing"
 
@@ -93,33 +92,38 @@ func TestRay_Transform(t *testing.T) {
 }
 
 func TestRay_PointAt(t *testing.T) {
-	newRayAt := ray.NewRayAt(ray.NewVec(2, 3, 4), ray.NewVec(1, 0, 0))
 
 	testCases := []struct {
+		name     string
 		tick     float64
 		expected ray.Vector
 	}{
 		{
+			name:     "0",
 			tick:     0,
-			expected: ray.NewVec(2, 3, 4),
+			expected: ray.NewPoint(2, 3, 4),
 		},
 		{
+			name:     "1",
 			tick:     1,
-			expected: ray.NewVec(3, 3, 4),
+			expected: ray.NewPoint(3, 3, 4),
 		},
 		{
+			name:     "-1",
 			tick:     -1,
-			expected: ray.NewVec(1, 3, 4),
+			expected: ray.NewPoint(1, 3, 4),
 		},
 		{
+			name:     "2.5",
 			tick:     2.5,
-			expected: ray.NewVec(4.5, 3, 4),
+			expected: ray.NewPoint(4.5, 3, 4),
 		},
 	}
 	for _, tt := range testCases {
-		name := fmt.Sprintf("tick_%v", tt.tick)
-		t.Run(name, func(t *testing.T) {
-			position := newRayAt.PointAt(tt.tick)
+		t.Run(tt.name, func(t *testing.T) {
+			r := ray.NewRayAt(ray.NewPoint(2, 3, 4), ray.NewVec(1, 0, 0))
+			position := r.PointAt(tt.tick)
+			t.Log(position)
 			assertVec(t, tt.expected, position)
 		})
 	}

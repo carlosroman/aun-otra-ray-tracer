@@ -61,10 +61,11 @@ func (v vec3) SetW(w float64) Vector {
 }
 
 func (v vec3) Add(vec Vector) Vector {
-	return NewVec(
+	return newTuple(
 		v.x+vec.GetX(),
 		v.y+vec.GetY(),
-		v.z+vec.GetZ())
+		v.z+vec.GetZ(),
+		v.w+vec.GetW())
 }
 
 func (v vec3) Subtract(vec Vector) Vector {
