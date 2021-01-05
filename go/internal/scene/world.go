@@ -38,8 +38,8 @@ func NewWorld() World {
 }
 
 type Intersection struct {
-	T   float64
-	Obj object.Object
+	T   float64       // Intersection value
+	Obj object.Object // Interesected object
 }
 
 type Intersections []Intersection
