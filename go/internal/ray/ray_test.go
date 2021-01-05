@@ -48,13 +48,13 @@ func Test_ray_get(t *testing.T) {
 }
 
 func TestRay_Direction(t *testing.T) {
-	newRayAt := ray.NewRayAt(ray.NewVec(2, 3, 4), ray.NewVec(1, 0, 0))
-	assertVec(t, ray.NewVec(1, 0, 0), newRayAt.Direction())
+	newRayAt := ray.NewRayAt(ray.NewPoint(1, 2, 3), ray.NewVec(4, 5, 6))
+	assertVec(t, ray.NewVec(4, 5, 6), newRayAt.Direction())
 }
 
 func TestRay_Origin(t *testing.T) {
-	newRayAt := ray.NewRayAt(ray.NewVec(2, 3, 4), ray.NewVec(1, 0, 0))
-	assertVec(t, ray.NewVec(2, 3, 4), newRayAt.Origin())
+	newRayAt := ray.NewRayAt(ray.NewPoint(1, 2, 3), ray.NewVec(4, 5, 6))
+	assertVec(t, ray.NewPoint(1, 2, 3), newRayAt.Origin())
 
 }
 
