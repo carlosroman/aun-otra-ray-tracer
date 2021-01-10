@@ -6,7 +6,7 @@ import (
 )
 
 func DefaultWorld() World {
-	light := object.NewPointLight(ray.NewPoint(-10, 10, -10), object.NewColor(1, 1, 1))
+	light := DefaultWorldLight()
 
 	s1 := object.NewSphere(ray.ZeroPoint, 1)
 	m1 := object.DefaultMaterial()
@@ -22,6 +22,10 @@ func DefaultWorld() World {
 	w.AddObjects(s1, s2)
 	w.AddLight(light)
 	return w
+}
+
+func DefaultWorldLight() object.PointLight {
+	return object.NewPointLight(ray.NewPoint(-10, 10, -10), object.NewColor(1, 1, 1))
 }
 
 func TwoSphereWorld() World {

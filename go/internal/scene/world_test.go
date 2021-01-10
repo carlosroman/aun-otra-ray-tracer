@@ -62,6 +62,54 @@ func createTestWorld(world scene.World) (object.Object, object.Object) {
 	return s1, s2
 }
 
+func TestShadeHit(t *testing.T) {
+
+	var emptyLight object.PointLight
+	testCases := []struct {
+		name              string
+		r                 ray.Ray
+		intersectionT     float64
+		intersectionShape int
+		expected          object.RGB
+		light             object.PointLight
+	}{
+		{
+			name:              "Shading an intersection",
+			r:                 ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			intersectionT:     4,
+			intersectionShape: 0,
+			expected:          object.NewColor(0.38066, 0.47583, 0.2855),
+		},
+		{
+			name:              "Shading an intersection from the inside",
+			r:                 ray.NewRayAt(ray.NewPoint(0, 0, 0), ray.NewVec(0, 0, 1)),
+			intersectionT:     0.5,
+			intersectionShape: 1,
+			light:             object.NewPointLight(ray.NewPoint(0, 0.25, 0), object.NewColor(1, 1, 1)),
+			expected:          object.NewColor(0.90498, 0.90498, 0.90498),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			// Given
+			w := scene.DefaultWorld()
+			if tt.light != emptyLight {
+				w.AddLight(tt.light)
+			}
+
+			shape := w.Objects()[tt.intersectionShape]
+			comps := scene.PrepareComputations(scene.Intersection{
+				T:   tt.intersectionT,
+				Obj: shape,
+			}, tt.r)
+			actual := scene.ShadeHit(w, comps)
+			assertColorEqual(t, tt.expected, actual)
+		})
+	}
+
+}
+
 func TestHit(t *testing.T) {
 	testCases := []struct {
 		name      string
@@ -107,4 +155,10 @@ func TestHit(t *testing.T) {
 			assert.Equal(t, testCase.expected, actual)
 		})
 	}
+}
+
+func assertColorEqual(t *testing.T, expected object.RGB, actual object.RGB) {
+	assert.InDelta(t, expected.R, actual.R, 0.00001, "R")
+	assert.InDelta(t, expected.G, actual.G, 0.00001, "G")
+	assert.InDelta(t, expected.B, actual.B, 0.00001, "B")
 }

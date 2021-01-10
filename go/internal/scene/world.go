@@ -71,6 +71,13 @@ func Intersect(w World, r ray.Ray) (intersections Intersections) {
 	return intersections
 }
 
+func ShadeHit(w World, comps Computation) object.RGB {
+	return object.Lighting(
+		comps.obj.Material(),
+		w.Light(),
+		comps.point, comps.eyev, comps.normalv)
+}
+
 func Hit(intersections Intersections) Intersection {
 	for i := range intersections {
 		if 0 <= intersections[i].T {
