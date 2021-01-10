@@ -22,11 +22,3 @@ func DefaultMaterial() Material {
 		Shininess: defaultMaterialShininess,
 	}
 }
-
-func NewColor(red, green, blue float64) RGB {
-	return RGB{
-		R: red,
-		G: green,
-		B: blue,
-	}
-}

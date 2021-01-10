@@ -52,31 +52,3 @@ func Lighting(
 	}
 	return ambient.Plus(diffuse).Plus(specular)
 }
-
-type RGB struct {
-	R, G, B float64
-}
-
-func (r RGB) Multiply(c RGB) (result RGB) {
-	return RGB{
-		R: r.R * c.R,
-		G: r.G * c.G,
-		B: r.B * c.B,
-	}
-}
-
-func (r RGB) MultiplyBy(scalar float64) (result RGB) {
-	return RGB{
-		R: r.R * scalar,
-		G: r.G * scalar,
-		B: r.B * scalar,
-	}
-}
-
-func (r RGB) Plus(c RGB) (result RGB) {
-	return RGB{
-		R: r.R + c.R,
-		G: r.G + c.G,
-		B: r.B + c.B,
-	}
-}
