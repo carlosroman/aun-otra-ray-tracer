@@ -13,12 +13,23 @@ type Material struct {
 	Ambient, Diffuse, Specular, Shininess float64
 }
 
-func DefaultMaterial() Material {
+func NewMaterial(color RGB,
+	ambient, diffuse, specular, shininess float64) Material {
 	return Material{
-		Color:     NewColor(defaultRGB, defaultRGB, defaultRGB),
-		Ambient:   defaultMaterialAmbient,
-		Diffuse:   defaultMaterialDiffuse,
-		Specular:  defaultMaterialSpecular,
-		Shininess: defaultMaterialShininess,
+		Color:     color,
+		Ambient:   ambient,
+		Diffuse:   diffuse,
+		Specular:  specular,
+		Shininess: shininess,
 	}
+}
+
+func DefaultMaterial() Material {
+	return NewMaterial(
+		NewColor(defaultRGB, defaultRGB, defaultRGB),
+		defaultMaterialAmbient,
+		defaultMaterialDiffuse,
+		defaultMaterialSpecular,
+		defaultMaterialShininess,
+	)
 }

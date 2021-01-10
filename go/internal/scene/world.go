@@ -11,10 +11,13 @@ type World interface {
 	Objects() []object.Object
 	AddObject(obj object.Object)
 	AddObjects(objs ...object.Object)
+	Light() object.PointLight
+	AddLight(light object.PointLight)
 }
 
 type world struct {
-	objs []object.Object
+	objs  []object.Object
+	light object.PointLight
 }
 
 func (w world) Objects() []object.Object {
@@ -29,6 +32,14 @@ func (w *world) AddObjects(objs ...object.Object) {
 	for _, obj := range objs {
 		w.objs = append(w.objs, obj)
 	}
+}
+
+func (w world) Light() object.PointLight {
+	return w.light
+}
+
+func (w *world) AddLight(light object.PointLight) {
+	w.light = light
 }
 
 func NewWorld() World {
