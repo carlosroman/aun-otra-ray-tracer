@@ -10,6 +10,7 @@ type sphere struct {
 	c ray.Vector
 	r float64
 	t ray.Matrix
+	m Material
 }
 
 func (s sphere) NormalAt(worldPoint ray.Vector) ray.Vector {
@@ -57,10 +58,23 @@ func (s *sphere) SetTransform(t ray.Matrix) {
 	s.t = t
 }
 
+func (s sphere) Material() Material {
+	return s.m
+}
+
+func (s *sphere) SetMaterial(m Material) {
+	s.m = m
+}
+
 func NewSphere(center ray.Vector, radius float64) Object {
 	return &sphere{
 		c: center,
 		r: radius,
 		t: ray.DefaultIdentityMatrix(),
+		m: DefaultMaterial(),
 	}
+}
+
+func DefaultSphere() Object {
+	return NewSphere(ray.NewPoint(0, 0, 0), 1)
 }

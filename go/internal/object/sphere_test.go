@@ -83,14 +83,27 @@ func TestSphere_Intersect(t *testing.T) {
 }
 
 func TestSphere_Transform(t *testing.T) {
-	obj := object.NewSphere(ray.NewPoint(0, 0, 0), 1)
+	obj := object.DefaultSphere()
 	translation := ray.Translation(2, 3, 4)
 	obj.SetTransform(translation)
 	assert.Equal(t, translation, obj.Transform())
 }
 
+func TestSphere_Material(t *testing.T) {
+	obj := object.DefaultSphere()
+	material := object.Material{
+		Color:     object.NewColor(1, 2, 3),
+		Ambient:   0,
+		Diffuse:   0,
+		Specular:  0,
+		Shininess: 0,
+	}
+	obj.SetMaterial(material)
+	assert.Equal(t, material, obj.Material())
+}
+
 func TestNewSphere(t *testing.T) {
-	obj := object.NewSphere(ray.NewPoint(0, 0, 0), 1)
+	obj := object.DefaultSphere()
 	assert.Equal(t, ray.DefaultIdentityMatrix(), obj.Transform())
 }
 

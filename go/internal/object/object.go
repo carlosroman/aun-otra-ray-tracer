@@ -7,6 +7,10 @@ import (
 type Object interface {
 	Intersect(ray ray.Ray) []float64
 	NormalAt(worldPoint ray.Vector) ray.Vector
+
 	Transform() ray.Matrix
 	SetTransform(t ray.Matrix)
+
+	Material() (m Material)
+	SetMaterial(m Material)
 }
