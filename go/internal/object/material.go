@@ -1,9 +1,7 @@
 package object
 
-import "image/color"
-
 const (
-	defaultRGB               = 1
+	defaultRGB               = float64(1)
 	defaultMaterialAmbient   = 0.1
 	defaultMaterialDiffuse   = 0.9
 	defaultMaterialSpecular  = 0.9
@@ -11,7 +9,7 @@ const (
 )
 
 type Material struct {
-	Color                                 color.RGBA
+	Color                                 RGB
 	Ambient, Diffuse, Specular, Shininess float64
 }
 
@@ -25,8 +23,8 @@ func DefaultMaterial() Material {
 	}
 }
 
-func NewColor(red, green, blue uint8) color.RGBA {
-	return color.RGBA{
+func NewColor(red, green, blue float64) RGB {
+	return RGB{
 		R: red,
 		G: green,
 		B: blue,

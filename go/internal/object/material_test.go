@@ -1,7 +1,6 @@
 package object_test
 
 import (
-	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,5 +15,5 @@ func TestDefaultMaterial(t *testing.T) {
 	assert.Equal(t, 0.9, material.Diffuse)
 	assert.Equal(t, 0.9, material.Specular)
 	assert.Equal(t, 200.0, material.Shininess)
-	assert.Equal(t, color.RGBA{R: 1, G: 1, B: 1, A: 0}, material.Color)
+	assert.Equal(t, object.RGB{R: 1, G: 1, B: 1}, material.Color)
 }
