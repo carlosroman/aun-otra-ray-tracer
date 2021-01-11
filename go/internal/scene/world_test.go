@@ -110,6 +110,51 @@ func TestShadeHit(t *testing.T) {
 
 }
 
+func TestWorld_ColorAt(t *testing.T) {
+
+	testCases := []struct {
+		name     string
+		r        ray.Ray
+		expected object.RGB
+		ambient  float64
+	}{
+		{
+			name:     "The color when a ray misses",
+			r:        ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 1, 0)),
+			expected: object.RGB{},
+		},
+		{
+			name:     "The color when a ray hits",
+			r:        ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			expected: object.NewColor(0.38066, 0.47583, 0.2855),
+		},
+		{
+			name:     "The color with an intersection behind the ray",
+			r:        ray.NewRayAt(ray.NewPoint(0, 0, 0.75), ray.NewVec(0, 0, -1)),
+			ambient:  1,
+			expected: object.NewColor(1, 1, 1),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			// Given default world
+			w := scene.DefaultWorld()
+			if tt.ambient > 0 {
+				for i := range w.Objects() {
+					obj := w.Objects()[i]
+					material := obj.Material()
+					material.Ambient = tt.ambient
+					w.Objects()[i].SetMaterial(material)
+				}
+			}
+
+			actual := w.ColorAt(tt.r)
+			assertColorEqual(t, tt.expected, actual)
+		})
+	}
+}
+
 func TestHit(t *testing.T) {
 	testCases := []struct {
 		name      string

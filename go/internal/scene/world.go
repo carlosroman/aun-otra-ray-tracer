@@ -13,6 +13,7 @@ type World interface {
 	AddObjects(objs ...object.Object)
 	Light() object.PointLight
 	AddLight(light object.PointLight)
+	ColorAt(r ray.Ray) object.RGB
 }
 
 type world struct {
@@ -40,6 +41,16 @@ func (w world) Light() object.PointLight {
 
 func (w *world) AddLight(light object.PointLight) {
 	w.light = light
+}
+
+func (w *world) ColorAt(r ray.Ray) (color object.RGB) {
+	hit := Hit(Intersect(w, r))
+	if hit == NoHit {
+		return color
+	}
+	return ShadeHit(
+		w,
+		PrepareComputations(hit, r))
 }
 
 func NewWorld() World {
