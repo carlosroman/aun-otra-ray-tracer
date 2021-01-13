@@ -24,7 +24,7 @@ func NewPPMOutput(img image.Image) (r io.Reader, err error) {
 	if err != nil {
 		return nil, err
 	}
-	for y := bounds.Dy() - 1; y >= 0; y-- {
+	for y := 0; y < bounds.Dy(); y++ {
 		for x := 0; x < bounds.Dx(); x++ {
 			color := img.At(x, y)
 			red, green, blue, _ := color.RGBA()
