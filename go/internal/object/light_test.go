@@ -24,6 +24,7 @@ func TestLighting(t *testing.T) {
 		name          string
 		eyev, normalv ray.Vector
 		light         object.PointLight
+		inShadows     bool
 		expectedColor object.RGB
 	}{
 		{
@@ -61,6 +62,14 @@ func TestLighting(t *testing.T) {
 			light:         object.NewPointLight(ray.NewPoint(0, 0, 10), object.NewColor(1, 1, 1)),
 			expectedColor: object.RGB{R: 0.1, B: 0.1, G: 0.1},
 		},
+		{
+			name:          "Lighting with the surface in shadow",
+			eyev:          ray.NewVec(0, 0, -1),
+			normalv:       ray.NewVec(0, 0, -1),
+			inShadows:     true,
+			light:         object.NewPointLight(ray.NewPoint(0, 0, -10), object.NewColor(1, 1, 1)),
+			expectedColor: object.RGB{R: 0.1, B: 0.1, G: 0.1},
+		},
 	}
 
 	for _, tt := range testCases {
@@ -70,7 +79,7 @@ func TestLighting(t *testing.T) {
 			position := ray.NewPoint(0, 0, 0)
 
 			// When
-			actual := object.Lighting(m, tt.light, position, tt.eyev, tt.normalv)
+			actual := object.Lighting(m, tt.light, position, tt.eyev, tt.normalv, tt.inShadows)
 
 			// Then
 			assertColorEqual(t, tt.expectedColor, actual)

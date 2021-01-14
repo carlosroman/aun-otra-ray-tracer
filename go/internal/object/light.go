@@ -21,17 +21,22 @@ func NewPointLight(position ray.Vector, intensity RGB) PointLight {
 func Lighting(
 	material Material,
 	light PointLight,
-	point, eyev, normalv ray.Vector) (result RGB) {
+	position, eyev, normalv ray.Vector,
+	inShadows bool) RGB {
 
 	// combine the surface color with the light's color/intensity
 	// effective color
 	ec := material.Color.Multiply(light.Intensity)
 
 	// find the direction to the light source
-	lightv := light.Position.Subtract(point).Normalize()
+	lightv := light.Position.Subtract(position).Normalize()
 
 	// compute the ambient contribution
 	ambient := ec.MultiplyBy(material.Ambient)
+
+	if inShadows {
+		return ambient
+	}
 
 	ldn := ray.Dot(lightv, normalv)
 

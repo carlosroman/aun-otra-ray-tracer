@@ -5,13 +5,18 @@ import (
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
+const (
+	epsilon = 0.00000001
+)
+
 type Computation struct {
-	t       float64 //Intersect
-	obj     object.Object
-	point   ray.Vector
-	eyev    ray.Vector
-	normalv ray.Vector
-	inside  bool
+	t         float64 //Intersect
+	obj       object.Object
+	point     ray.Vector
+	overPoint ray.Vector
+	eyev      ray.Vector
+	normalv   ray.Vector
+	inside    bool
 }
 
 func (c Computation) Intersect() float64 {
@@ -38,6 +43,10 @@ func (c Computation) Inside() bool {
 	return c.inside
 }
 
+func (c Computation) OverPoint() ray.Vector {
+	return c.overPoint
+}
+
 func PrepareComputations(i Intersection, r ray.Ray) (comps Computation) {
 	comps.t = i.T
 	comps.obj = i.Obj
@@ -49,5 +58,6 @@ func PrepareComputations(i Intersection, r ray.Ray) (comps Computation) {
 		comps.inside = true
 		comps.normalv = comps.normalv.Negate()
 	}
+	comps.overPoint = comps.point.Add(comps.normalv.Multiply(epsilon))
 	return comps
 }

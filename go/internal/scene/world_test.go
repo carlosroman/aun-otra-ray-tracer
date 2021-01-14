@@ -110,6 +110,20 @@ func TestShadeHit(t *testing.T) {
 
 }
 
+func TestShadeHitWithAnIntersectionInShadow(t *testing.T) {
+	w := scene.NewWorld()
+	w.AddLight(object.NewPointLight(ray.NewPoint(0, 0, -10), object.NewColor(1, 1, 1)))
+	s1 := object.NewSphere(ray.ZeroPoint, 1)
+	s2 := object.NewSphere(ray.ZeroPoint, 1)
+	s2.SetTransform(ray.Translation(0, 0, 10))
+	w.AddObjects(s1, s2)
+	r := ray.NewRayAt(ray.NewPoint(0, 0, 5), ray.NewVec(0, 0, 1))
+	i := scene.Intersection{T: 4, Obj: s2}
+	comps := scene.PrepareComputations(i, r)
+	c := scene.ShadeHit(w, comps)
+	assertColorEqual(t, object.NewColor(0.1, 0.1, 0.1), c)
+}
+
 func TestWorld_ColorAt(t *testing.T) {
 
 	testCases := []struct {
@@ -198,6 +212,44 @@ func TestHit(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := scene.Hit(testCase.hitPoints)
 			assert.Equal(t, testCase.expected, actual)
+		})
+	}
+}
+
+func TestWorld_IsShadowed(t *testing.T) {
+
+	testCases := []struct {
+		name       string
+		point      ray.Vector
+		isShadowed bool
+	}{
+		{
+			name:       "There is no shadow when nothing is collinear with point and light",
+			point:      ray.NewPoint(0, 10, 0),
+			isShadowed: false,
+		},
+		{
+			name:       "The shadow when an object is between the point and the light",
+			point:      ray.NewPoint(10, -10, 10),
+			isShadowed: true,
+		},
+		{
+			name:       "There is no shadow when an object is behind the light",
+			point:      ray.NewPoint(-20, 20, -20),
+			isShadowed: false,
+		},
+		{
+			name:       "There is no shadow when an object is behind the point",
+			point:      ray.NewPoint(-2, 2, -2),
+			isShadowed: false,
+		},
+	}
+
+	w := scene.DefaultWorld()
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := w.IsShadowed(tt.point)
+			assert.Equal(t, tt.isShadowed, actual)
 		})
 	}
 }

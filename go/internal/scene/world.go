@@ -14,6 +14,7 @@ type World interface {
 	Light() object.PointLight
 	AddLight(light object.PointLight)
 	ColorAt(r ray.Ray) object.RGB
+	IsShadowed(point ray.Vector) bool
 }
 
 type world struct {
@@ -53,6 +54,19 @@ func (w *world) ColorAt(r ray.Ray) (color object.RGB) {
 		PrepareComputations(hit, r))
 }
 
+func (w *world) IsShadowed(point ray.Vector) bool {
+	v := w.light.Position.Subtract(point)
+	distance := v.Magnitude()
+	direction := v.Normalize()
+	r := ray.NewRayAt(point, direction)
+	intersections := Intersect(w, r)
+	h := Hit(intersections)
+	if h != NoHit && h.T < distance {
+		return true
+	}
+	return false
+}
+
 func NewWorld() World {
 	return &world{
 		objs: nil,
@@ -86,7 +100,8 @@ func ShadeHit(w World, comps Computation) object.RGB {
 	return object.Lighting(
 		comps.obj.Material(),
 		w.Light(),
-		comps.point, comps.eyev, comps.normalv)
+		comps.overPoint, comps.eyev, comps.normalv,
+		w.IsShadowed(comps.overPoint))
 }
 
 func Hit(intersections Intersections) Intersection {
