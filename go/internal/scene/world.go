@@ -83,12 +83,14 @@ type Intersections []Intersection
 func Intersect(w World, r ray.Ray) (intersections Intersections) {
 	for i := range w.Objects() {
 		hits := w.Objects()[i].Intersect(r)
+		tmpHits := make(Intersections, len(hits))
 		for hit := range hits {
-			intersections = append(intersections, Intersection{
+			tmpHits[hit] = Intersection{
 				T:   hits[hit],
 				Obj: w.Objects()[i],
-			})
+			}
 		}
+		intersections = append(intersections, tmpHits...)
 	}
 	sort.SliceStable(intersections, func(i, j int) bool {
 		return intersections[i].T < intersections[j].T
