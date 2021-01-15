@@ -1,8 +1,11 @@
 package scene
 
 import (
+	"context"
 	"math"
+	"sync"
 
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
@@ -120,6 +123,55 @@ func (c camera) RayForPixel(nx, ny float64) ray.Ray {
 
 func (c camera) Origin() ray.Vector {
 	return c.origin
+}
+
+func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
+	canvas := NewCanvas(c.HSize(), c.VSize())
+	const cl = 255.99
+	type result struct {
+		color object.RGB
+		x, y  int
+	}
+	ch := make(chan result, queueSize)
+	calcCh := make(chan result, queueSize)
+	wg := sync.WaitGroup{}
+	wg.Add(noOfWorkers)
+	ctx, cancelFunc := context.WithCancel(context.Background())
+
+	go func() {
+		for {
+			select {
+			case out := <-ch:
+				canvas[out.x][out.y] = out.color
+			case <-ctx.Done():
+				close(ch)
+				return
+			}
+		}
+	}()
+
+	for workers := 0; workers < noOfWorkers; workers++ {
+		go func() {
+			for res := range calcCh {
+				r := c.RayForPixel(float64(res.x), float64(res.y))
+				res.color = w.ColorAt(r)
+				ch <- res
+			}
+			wg.Done()
+		}()
+	}
+	for y := 0; y < c.VSize()-1; y++ {
+		for x := 0; x < c.HSize()-1; x++ {
+			calcCh <- result{
+				x: x,
+				y: y,
+			}
+		}
+	}
+	close(calcCh)
+	wg.Wait()
+	cancelFunc()
+	return canvas
 }
 
 func Render(c Camera, w World) Canvas {

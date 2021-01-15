@@ -139,11 +139,27 @@ func TestRender(t *testing.T) {
 	up := ray.NewVec(0, 1, 0)
 	c.SetTransform(ray.ViewTransform(from, to, up))
 
-	img := scene.Render(c, w)
-	assertColorEqual(t, object.NewColor(0.38066, 0.47583, 0.2855), img[5][5])
+	testCases := []struct {
+		name string
+		img  scene.Canvas
+	}{
+		{
+			name: "Simple",
+			img:  scene.Render(c, w),
+		},
+		{
+			name: "MultiThreaded",
+			img:  scene.MultiThreadedRender(c, w, 10, 100),
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			assertColorEqual(t, object.NewColor(0.38066, 0.47583, 0.2855), tt.img[5][5])
+		})
+	}
 }
 
-var img scene.Canvas
+var benchImg scene.Canvas
 
 func BenchmarkRender(b *testing.B) {
 
@@ -154,5 +170,5 @@ func BenchmarkRender(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		canvas = scene.Render(c, w)
 	}
-	img = canvas
+	benchImg = canvas
 }
