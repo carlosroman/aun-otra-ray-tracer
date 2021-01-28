@@ -13,18 +13,22 @@ type sphere struct {
 	m Material
 }
 
-func (s sphere) NormalAt(worldPoint ray.Vector) ray.Vector {
-	inv, err := s.t.Inverse()
+func NormalAt(obj Object, worldPoint ray.Vector) ray.Vector {
+	inv, err := obj.Transform().Inverse()
 	if err != nil {
 		return nil
 	}
-	objPt := inv.MultiplyByVector(worldPoint)
-	objN := objPt.Subtract(s.c)
+	localPoint := inv.MultiplyByVector(worldPoint)
+	localNormal := obj.LocalNormalAt(localPoint)
 	return inv.
 		Transpose().
-		MultiplyByVector(objN).
+		MultiplyByVector(localNormal).
 		SetW(0).
 		Normalize()
+}
+
+func (s sphere) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
+	return worldPoint.Subtract(s.c)
 }
 
 func Intersect(obj Object, rr ray.Ray) []float64 {
@@ -35,7 +39,7 @@ func Intersect(obj Object, rr ray.Ray) []float64 {
 	return obj.LocalIntersect(rr.Transform(inv))
 }
 
-func (s sphere) LocalIntersect(r ray.Ray) []float64 {
+func (s *sphere) LocalIntersect(r ray.Ray) []float64 {
 	sphereToRay := r.Origin().Subtract(s.c)
 	a := ray.Dot(r.Direction(), r.Direction())
 	b := 2 * ray.Dot(r.Direction(), sphereToRay)

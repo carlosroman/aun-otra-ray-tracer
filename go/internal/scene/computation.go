@@ -52,7 +52,8 @@ func PrepareComputations(i Intersection, r ray.Ray) (comps Computation) {
 	comps.obj = i.Obj
 	comps.point = r.PointAt(comps.t)
 	comps.eyev = r.Direction().Negate()
-	comps.normalv = i.Obj.NormalAt(comps.point)
+	comps.normalv = object.NormalAt(i.Obj, comps.point)
+	//comps.normalv = i.Obj.LocalNormalAt(comps.point)
 
 	if ray.Dot(comps.normalv, comps.eyev) < 0 {
 		comps.inside = true

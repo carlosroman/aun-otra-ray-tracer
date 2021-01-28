@@ -77,17 +77,20 @@ func TestIntersect(t *testing.T) {
 		sphere    object.Object
 		transform ray.Matrix
 		expected  []float64
+		//expectedSavedRay ray.Ray
 	}{
 		{
 			name:     "center",
 			ray:      ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
 			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected: []float64{4.0, 6.0},
+			//expectedSavedRay: ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
 		},
 		{
 			name:   "misses",
 			ray:    ray.NewRayAt(ray.NewPoint(0, 2, -5), ray.NewVec(0, 0, 1)),
 			sphere: object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			//expectedSavedRay: ray.NewRayAt(ray.NewPoint(0, 2, -5), ray.NewVec(0, 0, 1)),
 		},
 		{
 			name:      "scaled",
@@ -95,12 +98,14 @@ func TestIntersect(t *testing.T) {
 			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			transform: ray.Scaling(2, 2, 2),
 			expected:  []float64{3, 7},
+			//expectedSavedRay: ray.NewRayAt(ray.NewPoint(0, 0, -2.5), ray.NewVec(0, 0, 0.5)),
 		},
 		{
 			name:      "translated",
 			ray:       ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
 			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			transform: ray.Translation(5, 0, 0),
+			//expectedSavedRay: ray.NewRayAt(ray.NewPoint(-5, 0, -5), ray.NewVec(0, 0, 1)),
 		},
 	}
 	for _, tt := range testCases {
@@ -148,7 +153,7 @@ func TestNewSphere(t *testing.T) {
 	assert.Equal(t, ray.DefaultIdentityMatrix(), obj.Transform())
 }
 
-func TestSphere_NormalAt(t *testing.T) {
+func TestSphere_LocalNormalAt(t *testing.T) {
 
 	testCases := []struct {
 		name      string
@@ -185,6 +190,47 @@ func TestSphere_NormalAt(t *testing.T) {
 			name:      "translation",
 			point:     ray.NewPoint(0, 1.70711, -0.70711),
 			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			expected:  ray.NewVec(0, 1.70711, -0.70711),
+			transform: ray.Translation(0, 1, 0),
+		},
+		{
+			name:      "transformed",
+			point:     ray.NewPoint(0, math.Sqrt(2)/2, -math.Sqrt(2)/2),
+			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			expected:  ray.NewVec(0, math.Sqrt(2)/2, -math.Sqrt(2)/2),
+			transform: ray.Scaling(1, 0.5, 1).Multiply(ray.Rotation(ray.Z, math.Pi/5)),
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.transform != nil {
+				tt.sphere.SetTransform(tt.transform)
+			}
+			actual := tt.sphere.LocalNormalAt(tt.point)
+			assertVec(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestNormalAt(t *testing.T) {
+
+	testCases := []struct {
+		name      string
+		point     ray.Vector
+		sphere    object.Object
+		expected  ray.Vector
+		transform ray.Matrix
+	}{
+		{
+			name:     "nonaxial",
+			point:    ray.NewPoint(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
+			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			expected: ray.NewVec(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3),
+		},
+		{
+			name:      "translation",
+			point:     ray.NewPoint(0, 1.70711, -0.70711),
+			sphere:    object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected:  ray.NewVec(0, 0.70711, -0.70711),
 			transform: ray.Translation(0, 1, 0),
 		},
@@ -201,7 +247,7 @@ func TestSphere_NormalAt(t *testing.T) {
 			if tt.transform != nil {
 				tt.sphere.SetTransform(tt.transform)
 			}
-			actual := tt.sphere.NormalAt(tt.point)
+			actual := object.NormalAt(tt.sphere, tt.point)
 			assertVec(t, tt.expected, actual)
 			assertVec(t, tt.expected, actual.Normalize())
 		})

@@ -6,7 +6,7 @@ import (
 
 type Object interface {
 	LocalIntersect(ray ray.Ray) []float64
-	NormalAt(worldPoint ray.Vector) ray.Vector
+	LocalNormalAt(worldPoint ray.Vector) ray.Vector
 
 	Transform() ray.Matrix
 	SetTransform(t ray.Matrix)
