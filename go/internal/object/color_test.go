@@ -43,3 +43,11 @@ func TestRGB_MultiplyBy(t *testing.T) {
 	assertColorEqual(t, expected, actual)
 	assertColorEqual(t, object.NewColor(0.2, 0.3, 0.4), c)
 }
+
+func TestBlack(t *testing.T) {
+	assertColorEqual(t, object.NewColor(0, 0, 0), object.Black)
+}
+
+func TestWhite(t *testing.T) {
+	assertColorEqual(t, object.NewColor(1, 1, 1), object.White)
+}

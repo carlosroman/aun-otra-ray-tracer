@@ -4,6 +4,11 @@ type RGB struct {
 	R, G, B float64
 }
 
+var (
+	Black = NewColor(0, 0, 0)
+	White = NewColor(1, 1, 1)
+)
+
 func NewColor(red, green, blue float64) RGB {
 	return RGB{
 		R: red,
