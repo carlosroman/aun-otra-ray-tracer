@@ -5,7 +5,7 @@ import (
 )
 
 type Object interface {
-	Intersect(ray ray.Ray) []float64
+	LocalIntersect(ray ray.Ray) []float64
 	NormalAt(worldPoint ray.Vector) ray.Vector
 
 	Transform() ray.Matrix

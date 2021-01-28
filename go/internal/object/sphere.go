@@ -27,12 +27,15 @@ func (s sphere) NormalAt(worldPoint ray.Vector) ray.Vector {
 		Normalize()
 }
 
-func (s sphere) Intersect(rr ray.Ray) []float64 {
-	inv, err := s.t.Inverse()
+func Intersect(obj Object, rr ray.Ray) []float64 {
+	inv, err := obj.Transform().Inverse()
 	if err != nil {
 		return nil
 	}
-	r := rr.Transform(inv)
+	return obj.LocalIntersect(rr.Transform(inv))
+}
+
+func (s sphere) LocalIntersect(r ray.Ray) []float64 {
 	sphereToRay := r.Origin().Subtract(s.c)
 	a := ray.Dot(r.Direction(), r.Direction())
 	b := 2 * ray.Dot(r.Direction(), sphereToRay)

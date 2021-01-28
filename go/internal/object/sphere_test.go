@@ -11,7 +11,8 @@ import (
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
-func TestSphere_Intersect(t *testing.T) {
+func TestSphere_LocalIntersect(t *testing.T) {
+
 	testCases := []struct {
 		name      string
 		ray       ray.Ray
@@ -48,6 +49,46 @@ func TestSphere_Intersect(t *testing.T) {
 			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
 			expected: []float64{-6.0, -4.0},
 		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.transform != nil {
+				tt.sphere.SetTransform(tt.transform)
+			}
+			intersects := tt.sphere.LocalIntersect(tt.ray)
+			if len(tt.expected) < 1 {
+				require.Empty(t, intersects)
+				return
+			}
+
+			assert.NotEmpty(t, intersects)
+			require.Len(t, intersects, len(tt.expected))
+			for i := range tt.expected {
+				assert.Equal(t, tt.expected[i], intersects[i])
+			}
+		})
+	}
+}
+
+func TestIntersect(t *testing.T) {
+	testCases := []struct {
+		name      string
+		ray       ray.Ray
+		sphere    object.Object
+		transform ray.Matrix
+		expected  []float64
+	}{
+		{
+			name:     "center",
+			ray:      ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			sphere:   object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+			expected: []float64{4.0, 6.0},
+		},
+		{
+			name:   "misses",
+			ray:    ray.NewRayAt(ray.NewPoint(0, 2, -5), ray.NewVec(0, 0, 1)),
+			sphere: object.NewSphere(ray.NewPoint(0, 0, 0), 1),
+		},
 		{
 			name:      "scaled",
 			ray:       ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
@@ -67,7 +108,7 @@ func TestSphere_Intersect(t *testing.T) {
 			if tt.transform != nil {
 				tt.sphere.SetTransform(tt.transform)
 			}
-			intersects := tt.sphere.Intersect(tt.ray)
+			intersects := object.Intersect(tt.sphere, tt.ray)
 			if len(tt.expected) < 1 {
 				require.Empty(t, intersects)
 				return

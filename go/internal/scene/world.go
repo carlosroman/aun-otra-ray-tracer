@@ -82,7 +82,8 @@ type Intersections []Intersection
 
 func Intersect(w World, r ray.Ray) (intersections Intersections) {
 	for i := range w.Objects() {
-		hits := w.Objects()[i].Intersect(r)
+		hits := object.Intersect(w.Objects()[i], r)
+		//hits := w.Objects()[i].LocalIntersect(r)
 		tmpHits := make(Intersections, len(hits))
 		for hit := range hits {
 			tmpHits[hit] = Intersection{
