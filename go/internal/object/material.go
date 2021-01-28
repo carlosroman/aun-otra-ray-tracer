@@ -8,14 +8,20 @@ const (
 	defaultMaterialShininess = 200.0
 )
 
+var (
+	emptyPattern = StripePattern{}
+)
+
 type Material struct {
 	Color                                 RGB
+	Pattern                               StripePattern
 	Ambient, Diffuse, Specular, Shininess float64
 }
 
 func NewMaterial(color RGB,
 	ambient, diffuse, specular, shininess float64) Material {
 	return Material{
+		Pattern:   emptyPattern,
 		Color:     color,
 		Ambient:   ambient,
 		Diffuse:   diffuse,

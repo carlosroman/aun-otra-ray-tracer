@@ -24,9 +24,13 @@ func Lighting(
 	position, eyev, normalv ray.Vector,
 	inShadows bool) RGB {
 
+	color := material.Color
+	if material.Pattern != emptyPattern {
+		color = material.Pattern.At(position)
+	}
 	// combine the surface color with the light's color/intensity
 	// effective color
-	ec := material.Color.Multiply(light.Intensity)
+	ec := color.Multiply(light.Intensity)
 
 	// find the direction to the light source
 	lightv := light.Position.Subtract(position).Normalize()

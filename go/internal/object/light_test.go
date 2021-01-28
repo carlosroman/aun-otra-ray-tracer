@@ -87,6 +87,24 @@ func TestLighting(t *testing.T) {
 	}
 }
 
+func TestLighting_WithPattern(t *testing.T) {
+	m := object.DefaultMaterial()
+	m.Ambient = 1
+	m.Diffuse = 0
+	m.Specular = 0
+	m.Pattern = object.NewStripePattern(object.NewColor(1, 1, 1), object.NewColor(0, 0, 0))
+
+	eyev := ray.NewVec(0, 0, -1)
+	normalv := ray.NewVec(0, 0, -1)
+	light := object.NewPointLight(ray.NewPoint(0, 0, -10), object.NewColor(1, 1, 1))
+
+	c1 := object.Lighting(m, light, ray.NewPoint(0.9, 0, 0), eyev, normalv, false)
+	c2 := object.Lighting(m, light, ray.NewPoint(1.1, 0, 0), eyev, normalv, false)
+
+	assertColorEqual(t, object.NewColor(1, 1, 1), c1)
+	assertColorEqual(t, object.NewColor(0, 0, 0), c2)
+}
+
 func assertColorEqual(t *testing.T, expected object.RGB, actual object.RGB) {
 	assert.InDelta(t, expected.R, actual.R, 0.00001, "R")
 	assert.InDelta(t, expected.G, actual.G, 0.00001, "G")
