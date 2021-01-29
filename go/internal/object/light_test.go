@@ -76,10 +76,11 @@ func TestLighting(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Given
 			m := object.DefaultMaterial()
+			obj := object.NewSphere(ray.ZeroPoint, 1)
 			position := ray.NewPoint(0, 0, 0)
 
 			// When
-			actual := object.Lighting(m, tt.light, position, tt.eyev, tt.normalv, tt.inShadows)
+			actual := object.Lighting(m, obj, tt.light, position, tt.eyev, tt.normalv, tt.inShadows)
 
 			// Then
 			assertColorEqual(t, tt.expectedColor, actual)
@@ -98,8 +99,9 @@ func TestLighting_WithPattern(t *testing.T) {
 	normalv := ray.NewVec(0, 0, -1)
 	light := object.NewPointLight(ray.NewPoint(0, 0, -10), object.NewColor(1, 1, 1))
 
-	c1 := object.Lighting(m, light, ray.NewPoint(0.9, 0, 0), eyev, normalv, false)
-	c2 := object.Lighting(m, light, ray.NewPoint(1.1, 0, 0), eyev, normalv, false)
+	obj := object.NewSphere(ray.ZeroPoint, 1)
+	c1 := object.Lighting(m, obj, light, ray.NewPoint(0.9, 0, 0), eyev, normalv, false)
+	c2 := object.Lighting(m, obj, light, ray.NewPoint(1.1, 0, 0), eyev, normalv, false)
 
 	assertColorEqual(t, object.NewColor(1, 1, 1), c1)
 	assertColorEqual(t, object.NewColor(0, 0, 0), c2)

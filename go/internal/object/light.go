@@ -20,13 +20,14 @@ func NewPointLight(position ray.Vector, intensity RGB) PointLight {
 
 func Lighting(
 	material Material,
+	obj Object,
 	light PointLight,
 	position, eyev, normalv ray.Vector,
 	inShadows bool) RGB {
 
 	color := material.Color
-	if material.Pattern != emptyPattern {
-		color = material.Pattern.At(position)
+	if !material.Pattern.IsEmpty() {
+		color = material.Pattern.AtObj(obj, position)
 	}
 	// combine the surface color with the light's color/intensity
 	// effective color

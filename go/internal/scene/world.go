@@ -101,6 +101,7 @@ func Intersect(w World, r ray.Ray) (intersections Intersections) {
 func ShadeHit(w World, comps Computation) object.RGB {
 	return object.Lighting(
 		comps.obj.Material(),
+		comps.obj,
 		w.Light(),
 		comps.overPoint, comps.eyev, comps.normalv,
 		w.IsShadowed(comps.overPoint))

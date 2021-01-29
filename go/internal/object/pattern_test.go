@@ -5,6 +5,7 @@ import (
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewStripePattern(t *testing.T) {
@@ -97,6 +98,81 @@ func TestStripePattern_At(t *testing.T) {
 				actual := pattern.At(arg.point)
 				assertColorEqual(t, arg.expected, actual)
 			}
+		})
+	}
+}
+
+func TestStripePattern_AtObj(t *testing.T) {
+	testCases := []struct {
+		name             string
+		point            ray.Vector
+		expected         object.RGB
+		pattern          object.StripePattern
+		objTransform     ray.Matrix
+		patternTransform ray.Matrix
+	}{
+		{
+			name:         "Stripes with an object transformation",
+			point:        ray.NewPoint(1.5, 0, 0),
+			pattern:      object.NewStripePattern(object.White, object.Black),
+			objTransform: ray.Scaling(2, 2, 2),
+			expected:     object.White,
+		},
+		{
+			name:             "Stripes with a pattern transformation",
+			point:            ray.NewPoint(1.5, 0, 0),
+			pattern:          object.NewStripePattern(object.White, object.Black),
+			patternTransform: ray.Scaling(2, 2, 2),
+			expected:         object.White,
+		},
+		{
+			name:             "Stripes with both an object and a pattern transformation",
+			point:            ray.NewPoint(2.5, 0, 0),
+			pattern:          object.NewStripePattern(object.White, object.Black),
+			objTransform:     ray.Scaling(2, 2, 2),
+			patternTransform: ray.Translation(0.5, 0, 0),
+			expected:         object.White,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			obj := object.NewSphere(ray.NewPoint(0, 0, 0), 1)
+			if tt.objTransform != nil {
+				obj.SetTransform(tt.objTransform)
+			}
+
+			if tt.patternTransform != nil {
+				tt.pattern.Transform = tt.patternTransform
+			}
+			actual := tt.pattern.AtObj(obj, tt.point)
+			assertColorEqual(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestStripePattern_IsEmpty(t *testing.T) {
+
+	testCases := []struct {
+		name     string
+		pattern  object.StripePattern
+		expected bool
+	}{
+		{
+			name:     "None empty",
+			pattern:  object.NewStripePattern(object.White, object.Black),
+			expected: false,
+		},
+		{
+			name:     "Empty",
+			pattern:  object.EmptyStripePattern(),
+			expected: true,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.pattern.IsEmpty())
 		})
 	}
 }
