@@ -176,3 +176,53 @@ func TestStripePattern_IsEmpty(t *testing.T) {
 		})
 	}
 }
+
+func TestNewTestPattern(t *testing.T) {
+
+	testCases := []struct {
+		name             string
+		point            ray.Vector
+		shapeTransform   ray.Matrix
+		patternTransform ray.Matrix
+		expected         object.RGB
+	}{
+		{
+			name:           "A pattern with an object transformation",
+			shapeTransform: ray.Scaling(2, 2, 2),
+			point:          ray.NewPoint(2, 3, 4),
+			expected:       object.NewColor(1, 1.5, 2),
+		},
+		{
+			name:             "A pattern with a pattern transformation",
+			patternTransform: ray.Scaling(2, 2, 2),
+			point:            ray.NewPoint(2, 3, 4),
+			expected:         object.NewColor(1, 1.5, 2),
+		},
+		{
+			name:             "A pattern with both an object and a pattern transformation",
+			patternTransform: ray.Translation(0.5, 1, 1.5),
+			shapeTransform:   ray.Scaling(2, 2, 2),
+			point:            ray.NewPoint(2.5, 3, 3.5),
+			expected:         object.NewColor(0.75, 0.5, 0.25),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			shape := object.NewSphere(ray.ZeroPoint, 1)
+
+			if tt.shapeTransform != nil {
+				shape.SetTransform(tt.shapeTransform)
+			}
+
+			pattern := object.NewTestPattern()
+			if tt.patternTransform != nil {
+				pattern.Transform = tt.patternTransform
+			}
+
+			actual := pattern.AtObj(shape, tt.point)
+			assertColorEqual(t, tt.expected, actual)
+		})
+	}
+
+}
