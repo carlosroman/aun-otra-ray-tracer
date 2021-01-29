@@ -25,6 +25,7 @@ func TestDefaultWorld(t *testing.T) {
 
 	w := scene.DefaultWorld()
 
+	assert.Len(t, w.Objects(), 2)
 	assert.Contains(t, w.Objects(), s1)
 	assert.Contains(t, w.Objects(), s2)
 	assert.Equal(t, light, w.Light())

@@ -10,14 +10,14 @@ const (
 
 type Material struct {
 	Color                                 RGB
-	Pattern                               StripePattern
+	Pattern                               Pattern
 	Ambient, Diffuse, Specular, Shininess float64
 }
 
 func NewMaterial(color RGB,
 	ambient, diffuse, specular, shininess float64) Material {
 	return Material{
-		Pattern:   EmptyStripePattern(),
+		Pattern:   Pattern{},
 		Color:     color,
 		Ambient:   ambient,
 		Diffuse:   diffuse,

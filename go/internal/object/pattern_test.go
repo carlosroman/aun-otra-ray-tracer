@@ -1,18 +1,13 @@
 package object_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestNewStripePattern(t *testing.T) {
-	p := object.NewStripePattern(object.White, object.Black)
-	assertColorEqual(t, object.White, p.A)
-	assertColorEqual(t, object.Black, p.B)
-}
 
 func TestStripePattern_At(t *testing.T) {
 
@@ -107,7 +102,7 @@ func TestStripePattern_AtObj(t *testing.T) {
 		name             string
 		point            ray.Vector
 		expected         object.RGB
-		pattern          object.StripePattern
+		pattern          object.Pattern
 		objTransform     ray.Matrix
 		patternTransform ray.Matrix
 	}{
@@ -155,24 +150,24 @@ func TestStripePattern_IsEmpty(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		pattern  object.StripePattern
+		pattern  object.Pattern
 		expected bool
 	}{
 		{
 			name:     "None empty",
 			pattern:  object.NewStripePattern(object.White, object.Black),
-			expected: false,
+			expected: true,
 		},
 		{
 			name:     "Empty",
-			pattern:  object.EmptyStripePattern(),
-			expected: true,
+			pattern:  object.EmptyPattern(),
+			expected: false,
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.pattern.IsEmpty())
+			assert.Equal(t, tt.expected, tt.pattern.IsNotEmpty)
 		})
 	}
 }
@@ -225,4 +220,151 @@ func TestNewTestPattern(t *testing.T) {
 		})
 	}
 
+}
+
+func TestNewGradientPattern(t *testing.T) {
+	pattern := object.NewGradientPattern(object.White, object.Black)
+
+	testCases := []struct {
+		name     string
+		point    ray.Vector
+		expected object.RGB
+	}{
+		{
+			name:     "0, 0, 0",
+			point:    ray.NewPoint(0, 0, 0),
+			expected: object.White,
+		},
+		{
+			name:     "0.25, 0, 0",
+			point:    ray.NewPoint(0.25, 0, 0),
+			expected: object.NewColor(0.75, 0.75, 0.75),
+		},
+		{
+			name:     "0.5, 0, 0",
+			point:    ray.NewPoint(0.5, 0, 0),
+			expected: object.NewColor(0.5, 0.5, 0.5),
+		},
+		{
+			name:     "0.75, 0, 0",
+			point:    ray.NewPoint(0.75, 0, 0),
+			expected: object.NewColor(0.25, 0.25, 0.25),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := pattern.At(tt.point)
+			assertColorEqual(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestNewRingPattern(t *testing.T) {
+	pattern := object.NewRingPattern(object.White, object.Black)
+	testCases := []struct {
+		name     string
+		point    ray.Vector
+		expected object.RGB
+	}{
+		{
+			name:     "0, 0, 0",
+			point:    ray.NewPoint(0, 0, 0),
+			expected: object.White,
+		},
+		{
+			name:     "1, 0, 0",
+			point:    ray.NewPoint(1, 0, 0),
+			expected: object.Black,
+		},
+		{
+			name:     "0, 0, 1",
+			point:    ray.NewPoint(0, 0, 1),
+			expected: object.Black,
+		},
+		{
+			name:     "√2/2, 0, √2/2",
+			point:    ray.NewPoint(math.Sqrt(2)/2, 0, math.Sqrt(2)/2),
+			expected: object.Black,
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := pattern.At(tt.point)
+			assertColorEqual(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestNewCheckerPattern(t *testing.T) {
+	pattern := object.NewCheckerPattern(object.White, object.Black)
+
+	type args struct {
+		point    ray.Vector
+		expected object.RGB
+	}
+	testCases := []struct {
+		name     string
+		expected []args
+	}{
+		{
+			name: "Checkers should repeat in x",
+			expected: []args{
+				{
+					point:    ray.NewPoint(0, 0, 0),
+					expected: object.White,
+				},
+				{
+					point:    ray.NewPoint(0.99, 0, 0),
+					expected: object.White,
+				},
+				{
+					point:    ray.NewPoint(1.01, 0, 0),
+					expected: object.Black,
+				},
+			},
+		},
+		{
+			name: "Checkers should repeat in y",
+			expected: []args{
+				{
+					point:    ray.NewPoint(0, 0, 0),
+					expected: object.White,
+				},
+				{
+					point:    ray.NewPoint(0, 0.99, 0),
+					expected: object.White,
+				},
+				{
+					point:    ray.NewPoint(0, 1.01, 0),
+					expected: object.Black,
+				},
+			},
+		},
+		{
+			name: "Checkers should repeat in z",
+			expected: []args{
+				{
+					point:    ray.NewPoint(0, 0, 0),
+					expected: object.White,
+				},
+				{
+					point:    ray.NewPoint(0, 0, 0.99),
+					expected: object.White,
+				},
+				{
+					point:    ray.NewPoint(0, 0, 1.01),
+					expected: object.Black,
+				},
+			},
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, arg := range tt.expected {
+				actual := pattern.At(arg.point)
+				assertColorEqual(t, arg.expected, actual)
+			}
+		})
+	}
 }

@@ -1,14 +1,16 @@
 package object
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
 type Pattern struct {
-	Transform ray.Matrix
-	At        func(point ray.Vector) RGB
+	Transform  ray.Matrix
+	At         func(point ray.Vector) RGB
+	IsNotEmpty bool
 }
 
 func (p Pattern) AtObj(obj Object, worldPoint ray.Vector) RGB {
@@ -30,44 +32,30 @@ type StripePattern struct {
 	A, B RGB
 }
 
-func EmptyStripePattern() StripePattern {
-	return StripePattern{}
+func EmptyPattern() Pattern {
+	return Pattern{
+		Transform: ray.DefaultIdentityMatrix(),
+		At: func(_ ray.Vector) RGB {
+			return Black
+		},
+	}
 }
 
-func NewStripePattern(a, b RGB) StripePattern {
-	p := StripePattern{
-		A: a,
-		B: b,
-	}
-	p.Transform = ray.DefaultIdentityMatrix()
+func NewStripePattern(a, b RGB) (p Pattern) {
+	p = NewTestPattern()
 	p.At = func(point ray.Vector) RGB {
 		if math.Remainder(math.Floor(point.GetX()), 2) == 0 {
-			return p.A
+			return a
 		}
-		return p.B
+		return b
 	}
 	return p
 }
 
-func (s StripePattern) IsEmpty() bool {
-	if s.A == emptyStripePattern.A &&
-		s.B == emptyStripePattern.B &&
-		len(s.Transform) < 1 {
-		return true
+func NewTestPattern() (p Pattern) {
+	p = Pattern{
+		IsNotEmpty: true,
 	}
-	return false
-}
-
-var (
-	emptyStripePattern = StripePattern{}
-)
-
-type TestPattern struct {
-	Pattern
-}
-
-func NewTestPattern() (p TestPattern) {
-	p = TestPattern{}
 	p.Transform = ray.DefaultIdentityMatrix()
 	p.At = func(point ray.Vector) RGB {
 		return RGB{
@@ -75,6 +63,45 @@ func NewTestPattern() (p TestPattern) {
 			G: point.GetY(),
 			B: point.GetZ(),
 		}
+	}
+	return p
+}
+
+func NewGradientPattern(a, b RGB) (p Pattern) {
+	p = NewTestPattern()
+	d := b.Subtract(a)
+	p.At = func(point ray.Vector) RGB {
+		fmt.Println(point)
+		fraction := point.GetX() - math.Floor(point.GetX())
+		return a.Add(d.MultiplyBy(fraction))
+	}
+	return p
+}
+
+func NewRingPattern(a, b RGB) (p Pattern) {
+	p = NewTestPattern()
+	p.At = func(point ray.Vector) RGB {
+		valX := math.Pow(point.GetX(), 2)
+		valZ := math.Pow(point.GetZ(), 2)
+		val := math.Floor(math.Sqrt(valX + valZ))
+		if math.Mod(val, 2) == 0 {
+			return a
+		}
+		return b
+	}
+	return p
+}
+
+func NewCheckerPattern(a, b RGB) (p Pattern) {
+	p = NewTestPattern()
+	p.At = func(point ray.Vector) RGB {
+		val := math.Floor(point.GetX()) +
+			math.Floor(point.GetY()) +
+			math.Floor(point.GetZ())
+		if math.Mod(val, 2) == 0 {
+			return a
+		}
+		return b
 	}
 	return p
 }

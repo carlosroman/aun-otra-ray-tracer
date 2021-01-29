@@ -26,7 +26,7 @@ func Lighting(
 	inShadows bool) RGB {
 
 	color := material.Color
-	if !material.Pattern.IsEmpty() {
+	if material.Pattern.IsNotEmpty {
 		color = material.Pattern.AtObj(obj, position)
 	}
 	// combine the surface color with the light's color/intensity
