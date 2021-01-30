@@ -154,7 +154,7 @@ func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
 		go func() {
 			for res := range calcCh {
 				r := c.RayForPixel(float64(res.x), float64(res.y))
-				res.color = w.ColorAt(r)
+				res.color = w.ColorAt(r, defaultRecursiveDepth)
 				ch <- res
 			}
 			wg.Done()
@@ -180,8 +180,12 @@ func Render(c Camera, w World) Canvas {
 	for y := 0; y < c.VSize()-1; y++ {
 		for x := 0; x < c.HSize()-1; x++ {
 			r := c.RayForPixel(float64(x), float64(y))
-			canvas[x][y] = w.ColorAt(r)
+			canvas[x][y] = w.ColorAt(r, defaultRecursiveDepth)
 		}
 	}
 	return canvas
 }
+
+const (
+	defaultRecursiveDepth = 5
+)

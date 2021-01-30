@@ -13,7 +13,7 @@ type World interface {
 	AddObjects(objs ...object.Object)
 	Light() object.PointLight
 	AddLight(light object.PointLight)
-	ColorAt(r ray.Ray) object.RGB
+	ColorAt(r ray.Ray, remaining int) object.RGB
 	IsShadowed(point ray.Vector) bool
 }
 
@@ -44,14 +44,15 @@ func (w *world) AddLight(light object.PointLight) {
 	w.light = light
 }
 
-func (w *world) ColorAt(r ray.Ray) (color object.RGB) {
+func (w *world) ColorAt(r ray.Ray, remaining int) (color object.RGB) {
 	hit := Hit(Intersect(w, r))
 	if hit == NoHit {
 		return color
 	}
 	return ShadeHit(
 		w,
-		PrepareComputations(hit, r))
+		PrepareComputations(hit, r),
+		remaining)
 }
 
 func (w *world) IsShadowed(point ray.Vector) bool {
@@ -98,13 +99,27 @@ func Intersect(w World, r ray.Ray) (intersections Intersections) {
 	return intersections
 }
 
-func ShadeHit(w World, comps Computation) object.RGB {
+func ShadeHit(w World, comps Computation, remaining int) object.RGB {
 	return object.Lighting(
 		comps.obj.Material(),
 		comps.obj,
 		w.Light(),
 		comps.overPoint, comps.eyev, comps.normalv,
-		w.IsShadowed(comps.overPoint))
+		w.IsShadowed(comps.overPoint)).
+		Add(ReflectedColor(w, comps, remaining))
+}
+
+func ReflectedColor(w World, comps Computation, remaining int) object.RGB {
+	if remaining <= 0 {
+		return object.Black
+	}
+	if comps.obj.Material().Reflective == 0 {
+		return object.Black
+	}
+	reflectRay := ray.NewRayAt(comps.overPoint, comps.reflectv)
+	remaining--
+	color := w.ColorAt(reflectRay, remaining)
+	return color.MultiplyBy(comps.obj.Material().Reflective)
 }
 
 func Hit(intersections Intersections) Intersection {

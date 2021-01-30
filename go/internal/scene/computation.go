@@ -16,6 +16,7 @@ type Computation struct {
 	overPoint ray.Vector
 	eyev      ray.Vector
 	normalv   ray.Vector
+	reflectv  ray.Vector
 	inside    bool
 }
 
@@ -39,6 +40,10 @@ func (c Computation) Normalv() ray.Vector {
 	return c.normalv
 }
 
+func (c Computation) Reflectv() ray.Vector {
+	return c.reflectv
+}
+
 func (c Computation) Inside() bool {
 	return c.inside
 }
@@ -53,7 +58,7 @@ func PrepareComputations(i Intersection, r ray.Ray) (comps Computation) {
 	comps.point = r.PointAt(comps.t)
 	comps.eyev = r.Direction().Negate()
 	comps.normalv = object.NormalAt(i.Obj, comps.point)
-	//comps.normalv = i.Obj.LocalNormalAt(comps.point)
+	comps.reflectv = r.Direction().Reflect(comps.normalv)
 
 	if ray.Dot(comps.normalv, comps.eyev) < 0 {
 		comps.inside = true

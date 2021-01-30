@@ -2,6 +2,7 @@ package scene_test
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,8 +83,21 @@ func TestPrepareComputations(t *testing.T) {
 				fmt.Sprintf("Got %v > %v", actual.Point().GetZ(), actual.OverPoint().GetZ()))
 
 			// Does not seem to always be true :/
-			//assert.True(t, actual.OverPoint().GetZ() < -0.00000001/2,
+			//  assert.True(t, actual.OverPoint().GetZ() < -0.00000001/2,
 			//	fmt.Sprintf("Got %v < %v", actual.OverPoint().GetZ(), -0.00000001/2))
 		})
 	}
+}
+
+func TestComputation_Reflectv(t *testing.T) {
+	shape := object.NewPlane()
+	r := ray.NewRayAt(
+		ray.NewPoint(0, 1, -1),
+		ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
+	i := scene.Intersection{
+		T:   math.Sqrt(2),
+		Obj: shape,
+	}
+	actual := scene.PrepareComputations(i, r)
+	assert.Equal(t, ray.NewVec(0, math.Sqrt(2)/2, math.Sqrt(2)/2), actual.Reflectv())
 }

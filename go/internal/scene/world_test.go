@@ -1,6 +1,7 @@
 package scene_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -88,6 +89,13 @@ func TestShadeHit(t *testing.T) {
 			light:             object.NewPointLight(ray.NewPoint(0, 0.25, 0), object.NewColor(1, 1, 1)),
 			expected:          object.NewColor(0.90498, 0.90498, 0.90498),
 		},
+		{
+			name:              "Shading with a reflective material",
+			r:                 ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2)),
+			intersectionT:     math.Sqrt(2),
+			intersectionShape: 2,
+			expected:          object.NewColor(0.87677, 0.92436, 0.82918),
+		},
 	}
 
 	for _, tt := range testCases {
@@ -98,16 +106,71 @@ func TestShadeHit(t *testing.T) {
 				w.AddLight(tt.light)
 			}
 
+			if tt.intersectionShape+1 > len(w.Objects()) {
+				shape := object.NewPlane()
+				material := shape.Material()
+				material.Reflective = 0.5
+				shape.SetTransform(ray.Translation(0, -1, 0))
+				shape.SetMaterial(material)
+				w.AddObject(shape)
+			}
 			shape := w.Objects()[tt.intersectionShape]
 			comps := scene.PrepareComputations(scene.Intersection{
 				T:   tt.intersectionT,
 				Obj: shape,
 			}, tt.r)
-			actual := scene.ShadeHit(w, comps)
+			actual := scene.ShadeHit(w, comps, 1)
 			assertColorEqual(t, tt.expected, actual)
 		})
 	}
 
+}
+
+func TestReflectedColor(t *testing.T) {
+	t.Run("The reflected color for a nonreflective material", func(t *testing.T) {
+		w := scene.DefaultWorld()
+		shape := w.Objects()[1]
+		material := shape.Material()
+		material.Ambient = 1
+		shape.SetMaterial(material)
+		i := scene.Intersection{T: 1, Obj: shape}
+		r := ray.NewRayAt(ray.NewPoint(0, 0, 0), ray.NewVec(0, 0, 1))
+		comps := scene.PrepareComputations(i, r)
+		actual := scene.ReflectedColor(w, comps, 1)
+		assertColorEqual(t, object.NewColor(0, 0, 0), actual)
+	})
+
+	t.Run("The reflected color for a reflective material", func(t *testing.T) {
+		w := scene.DefaultWorld()
+		r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
+		shape := object.NewPlane()
+		material := shape.Material()
+		material.Reflective = 0.5
+		shape.SetTransform(ray.Translation(0, -1, 0))
+		shape.SetMaterial(material)
+		w.AddObject(shape)
+		i := scene.Intersection{T: math.Sqrt(2), Obj: shape}
+		comps := scene.PrepareComputations(i, r)
+		actual := scene.ReflectedColor(w, comps, 1)
+		assertColorEqual(t, object.NewColor(0.19032, 0.2379, 0.14274), actual)
+	})
+
+	t.Run("The reflected color at the maximum recursive depth", func(t *testing.T) {
+		w := scene.DefaultWorld()
+
+		r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
+		shape := object.NewPlane()
+		material := shape.Material()
+		material.Reflective = 0.5
+		shape.SetTransform(ray.Translation(0, -1, 0))
+		shape.SetMaterial(material)
+		w.AddObject(shape)
+
+		i := scene.Intersection{T: math.Sqrt(2), Obj: shape}
+		comps := scene.PrepareComputations(i, r)
+		actual := scene.ReflectedColor(w, comps, 0)
+		assertColorEqual(t, object.NewColor(0, 0, 0), actual)
+	})
 }
 
 func TestShadeHitWithAnIntersectionInShadow(t *testing.T) {
@@ -120,7 +183,7 @@ func TestShadeHitWithAnIntersectionInShadow(t *testing.T) {
 	r := ray.NewRayAt(ray.NewPoint(0, 0, 5), ray.NewVec(0, 0, 1))
 	i := scene.Intersection{T: 4, Obj: s2}
 	comps := scene.PrepareComputations(i, r)
-	c := scene.ShadeHit(w, comps)
+	c := scene.ShadeHit(w, comps, 1)
 	assertColorEqual(t, object.NewColor(0.1, 0.1, 0.1), c)
 }
 
@@ -163,10 +226,32 @@ func TestWorld_ColorAt(t *testing.T) {
 				}
 			}
 
-			actual := w.ColorAt(tt.r)
+			actual := w.ColorAt(tt.r, 1)
 			assertColorEqual(t, tt.expected, actual)
 		})
 	}
+
+	t.Run("With mutually reflective surfaces", func(t *testing.T) {
+		w := scene.DefaultWorld()
+		w.AddLight(object.NewPointLight(ray.ZeroPoint, object.NewColor(1, 1, 1)))
+		lower := object.NewPlane()
+		mLower := lower.Material()
+		mLower.Reflective = 1
+		lower.SetMaterial(mLower)
+		lower.SetTransform(ray.Translation(0, -1, 0))
+		w.AddObject(lower)
+		upper := object.NewPlane()
+		mUpper := upper.Material()
+		mUpper.Reflective = 1
+		upper.SetMaterial(mUpper)
+		upper.SetTransform(ray.Translation(0, 1, 0))
+		w.AddObject(upper)
+
+		r := ray.NewRayAt(ray.ZeroPoint, ray.NewVec(0, 1, 0))
+		actual := w.ColorAt(r, 100)
+		t.Log(actual)
+		assert.NotNil(t, actual)
+	})
 }
 
 func TestHit(t *testing.T) {
@@ -255,7 +340,7 @@ func TestWorld_IsShadowed(t *testing.T) {
 }
 
 func assertColorEqual(t *testing.T, expected object.RGB, actual object.RGB) {
-	assert.InDelta(t, expected.R, actual.R, 0.00001, "R")
-	assert.InDelta(t, expected.G, actual.G, 0.00001, "G")
-	assert.InDelta(t, expected.B, actual.B, 0.00001, "B")
+	assert.InDelta(t, expected.R, actual.R, 0.0001, "R")
+	assert.InDelta(t, expected.G, actual.G, 0.0001, "G")
+	assert.InDelta(t, expected.B, actual.B, 0.0001, "B")
 }
