@@ -22,16 +22,18 @@ func TestPrepareComputations(t *testing.T) {
 		intersectT                                   float64
 		expectedObjectTranslation                    ray.Matrix
 		expectedOverPoint                            ray.Vector
+		expectedUnderPoint                           ray.Vector
 	}{
 		{
-			name:              "when an intersection occurs on the outside",
-			r:                 ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
-			intersectT:        4,
-			expectedObject:    object.NewSphere(ray.ZeroPoint, 1),
-			expectedPoint:     ray.NewPoint(0, 0, -1),
-			expectedEyev:      ray.NewVec(0, 0, -1),
-			expectedNormalv:   ray.NewVec(0, 0, -1),
-			expectedOverPoint: ray.NewPoint(0, 0, -1.00000001),
+			name:               "when an intersection occurs on the outside",
+			r:                  ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			intersectT:         4,
+			expectedObject:     object.NewSphere(ray.ZeroPoint, 1),
+			expectedPoint:      ray.NewPoint(0, 0, -1),
+			expectedEyev:       ray.NewVec(0, 0, -1),
+			expectedNormalv:    ray.NewVec(0, 0, -1),
+			expectedOverPoint:  ray.NewPoint(0, 0, -1.00000001),
+			expectedUnderPoint: ray.NewPoint(0, 0, -0.99999999),
 		},
 		{
 			name:           "when an intersection occurs on the inside",
@@ -41,9 +43,10 @@ func TestPrepareComputations(t *testing.T) {
 			expectedPoint:  ray.NewPoint(0, 0, 1),
 			expectedEyev:   ray.NewVec(0, 0, -1),
 			//  normal would have been (0, 0, 1), but is inverted
-			expectedNormalv:   ray.NewVec(0, 0, -1),
-			expectedOverPoint: ray.NewPoint(0, 0, 0.99999999),
-			expectedInside:    true,
+			expectedNormalv:    ray.NewVec(0, 0, -1),
+			expectedOverPoint:  ray.NewPoint(0, 0, 0.99999999),
+			expectedUnderPoint: ray.NewPoint(0, 0, 1.00000001),
+			expectedInside:     true,
 		},
 		{
 			name:                      "The hit should offset the point",
@@ -55,6 +58,19 @@ func TestPrepareComputations(t *testing.T) {
 			expectedEyev:              ray.NewVec(0, 0, -1),
 			expectedNormalv:           ray.NewVec(0, 0, -1),
 			expectedOverPoint:         ray.NewPoint(0, 0, -0.00000001),
+			expectedUnderPoint:        ray.NewPoint(0, 0, 0.00000001),
+		},
+		{
+			name:                      "The under point is offset below the surface",
+			r:                         ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			intersectT:                5,
+			expectedObject:            object.DefaultGlassSphere(),
+			expectedObjectTranslation: ray.Translation(0, 0, 1),
+			expectedPoint:             ray.NewPoint(0, 0, 0),
+			expectedEyev:              ray.NewVec(0, 0, -1),
+			expectedNormalv:           ray.NewVec(0, 0, -1),
+			expectedOverPoint:         ray.NewPoint(0, 0, -0.00000001),
+			expectedUnderPoint:        ray.NewPoint(0, 0, 0.00000001),
 		},
 	}
 	for _, tt := range testCases {
@@ -78,6 +94,8 @@ func TestPrepareComputations(t *testing.T) {
 			assert.Equal(t, tt.expectedNormalv, actual.Normalv())
 			assert.Equal(t, tt.expectedInside, actual.Inside())
 			assert.Equal(t, tt.expectedOverPoint, actual.OverPoint())
+			assert.Equal(t, tt.expectedUnderPoint, actual.UnderPoint())
+			assert.True(t, actual.Point().GetZ() < actual.UnderPoint().GetZ())
 
 			assert.True(t, actual.Point().GetZ() > actual.OverPoint().GetZ(),
 				fmt.Sprintf("Got %v > %v", actual.Point().GetZ(), actual.OverPoint().GetZ()))
@@ -87,6 +105,57 @@ func TestPrepareComputations(t *testing.T) {
 			//	fmt.Sprintf("Got %v < %v", actual.OverPoint().GetZ(), -0.00000001/2))
 		})
 	}
+
+	t.Run("Finding n1 and n2 at various intersections", func(t *testing.T) {
+		// GIVEN
+		a := object.DefaultGlassSphere()
+		a.SetTransform(ray.Scaling(2, 2, 2))
+		aM := a.Material()
+		aM.RefractiveIndex = 1.5
+		a.SetMaterial(aM)
+
+		b := object.DefaultGlassSphere()
+		b.SetTransform(ray.Translation(0, 0, -0.25))
+		bM := b.Material()
+		bM.RefractiveIndex = 2.0
+		b.SetMaterial(bM)
+
+		c := object.DefaultGlassSphere()
+		c.SetTransform(ray.Translation(0, 0, 0.25))
+		cM := c.Material()
+		cM.RefractiveIndex = 2.5
+		c.SetMaterial(cM)
+
+		r := ray.NewRayAt(ray.NewPoint(0, 0, -4), ray.NewVec(0, 0, 1))
+		xs := scene.Intersections{
+			scene.Intersection{T: 2, Obj: a},
+			scene.Intersection{T: 2.75, Obj: b},
+			scene.Intersection{T: 3.25, Obj: c},
+			scene.Intersection{T: 4.75, Obj: b},
+			scene.Intersection{T: 5.25, Obj: c},
+			scene.Intersection{T: 6, Obj: a},
+		}
+
+		// WHEN
+		examples := []struct {
+			index  int
+			n1, n2 float64
+		}{
+			{index: 0, n1: 1.0, n2: 1.5},
+			{index: 1, n1: 1.5, n2: 2.0},
+			{index: 2, n1: 2.0, n2: 2.5},
+			{index: 3, n1: 2.5, n2: 2.5},
+			{index: 4, n1: 2.5, n2: 1.5},
+			{index: 5, n1: 1.5, n2: 1.0},
+		}
+
+		for _, example := range examples {
+			comps := scene.PrepareComputations(xs[example.index], r, xs...)
+			assert.NotNil(t, comps)
+			assert.Equal(t, example.n1, comps.N1(), "%v N1 did not match", example.index)
+			assert.Equal(t, example.n2, comps.N2(), "%v N2 did not match", example.index)
+		}
+	})
 }
 
 func TestComputation_Reflectv(t *testing.T) {

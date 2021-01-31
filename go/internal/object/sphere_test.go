@@ -151,6 +151,16 @@ func TestSphere_Material(t *testing.T) {
 func TestNewSphere(t *testing.T) {
 	obj := object.DefaultSphere()
 	assert.Equal(t, ray.DefaultIdentityMatrix(), obj.Transform())
+	assert.Equal(t, object.DefaultMaterial(), obj.Material())
+}
+
+func TestNewGlassSphere(t *testing.T) {
+	obj := object.DefaultGlassSphere()
+	assert.Equal(t, ray.DefaultIdentityMatrix(), obj.Transform())
+	expected := object.DefaultMaterial()
+	expected.Transparency = 1.0
+	expected.RefractiveIndex = 1.5
+	assert.Equal(t, expected, obj.Material())
 }
 
 func TestSphere_LocalNormalAt(t *testing.T) {

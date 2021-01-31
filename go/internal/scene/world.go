@@ -1,6 +1,7 @@
 package scene
 
 import (
+	"math"
 	"sort"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
@@ -76,7 +77,7 @@ func NewWorld() World {
 
 type Intersection struct {
 	T   float64       // Intersection value
-	Obj object.Object // Interesected object
+	Obj object.Object // Intersected object
 }
 
 type Intersections []Intersection
@@ -106,7 +107,8 @@ func ShadeHit(w World, comps Computation, remaining int) object.RGB {
 		w.Light(),
 		comps.overPoint, comps.eyev, comps.normalv,
 		w.IsShadowed(comps.overPoint)).
-		Add(ReflectedColor(w, comps, remaining))
+		Add(ReflectedColor(w, comps, remaining)).
+		Add(RefractedColor(w, comps, remaining))
 }
 
 func ReflectedColor(w World, comps Computation, remaining int) object.RGB {
@@ -120,6 +122,32 @@ func ReflectedColor(w World, comps Computation, remaining int) object.RGB {
 	remaining--
 	color := w.ColorAt(reflectRay, remaining)
 	return color.MultiplyBy(comps.obj.Material().Reflective)
+}
+
+func RefractedColor(w World, comps Computation, remaining int) object.RGB {
+	if remaining == 0 {
+		return object.Black
+	}
+	if comps.obj.Material().Transparency == 0 {
+		return object.Black
+	}
+
+	nRatio := comps.n1 / comps.n2
+	cosI := ray.Dot(comps.eyev, comps.normalv)
+	sin2t := math.Pow(nRatio, 2) * (1 - math.Pow(cosI, 2))
+	if sin2t > 1 {
+		return object.Black
+	}
+
+	cosT := math.Sqrt(1.0 - sin2t)
+	direction := comps.normalv.
+		Multiply(nRatio*cosI - cosT).
+		Subtract(comps.eyev.Multiply(nRatio))
+
+	refractRay := ray.NewRayAt(comps.underPoint, direction)
+	remaining--
+	return w.ColorAt(refractRay, remaining).
+		MultiplyBy(comps.obj.Material().Transparency)
 }
 
 func Hit(intersections Intersections) Intersection {

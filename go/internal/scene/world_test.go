@@ -173,6 +173,129 @@ func TestReflectedColor(t *testing.T) {
 	})
 }
 
+func TestRefractedColor(t *testing.T) {
+	testCases := []struct {
+		name                          string
+		r                             ray.Ray
+		expectedColor                 object.RGB
+		transparency, refractiveIndex float64
+		remaining                     int
+		intersectionTs                []float64
+		idx                           int
+	}{
+		{
+			name:           "The refracted color with an opaque surface",
+			r:              ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			expectedColor:  object.NewColor(0, 0, 0),
+			remaining:      5,
+			intersectionTs: []float64{4, 6},
+			idx:            0,
+		},
+		{
+			name:            "The refracted color at the maximum recursive depth",
+			r:               ray.NewRayAt(ray.NewPoint(0, 0, -5), ray.NewVec(0, 0, 1)),
+			expectedColor:   object.NewColor(0, 0, 0),
+			transparency:    1.0,
+			refractiveIndex: 1.5,
+			remaining:       0,
+			intersectionTs:  []float64{4, 6},
+			idx:             0,
+		},
+		{
+			name:            "The refracted color at the maximum recursive depth",
+			r:               ray.NewRayAt(ray.NewPoint(0, 0, math.Sqrt(2)/2), ray.NewVec(0, 1, 0)),
+			expectedColor:   object.NewColor(0, 0, 0),
+			transparency:    1.0,
+			refractiveIndex: 1.5,
+			remaining:       5,
+			intersectionTs:  []float64{-math.Sqrt(2) / 2, math.Sqrt(2) / 2},
+			idx:             1, // NOTE: this time you're inside the sphere, so you need to look at the second intersection, xs[1], not xs[0]
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			w := scene.DefaultWorld()
+			shape := w.Objects()[0]
+			shapeM := shape.Material()
+			if tt.refractiveIndex != 0 {
+				shapeM.RefractiveIndex = tt.refractiveIndex
+			}
+			if tt.transparency != 0 {
+				shapeM.Transparency = tt.transparency
+			}
+			shape.SetMaterial(shapeM)
+			xs := scene.Intersections{
+				{T: tt.intersectionTs[0], Obj: shape},
+				{T: tt.intersectionTs[1], Obj: shape},
+			}
+			comps := scene.PrepareComputations(xs[tt.idx], tt.r, xs...)
+			c := scene.RefractedColor(w, comps, tt.remaining)
+			assertColorEqual(t, tt.expectedColor, c)
+		})
+	}
+
+	t.Run("The refracted color with a refracted ray", func(t *testing.T) {
+
+		w := scene.DefaultWorld()
+
+		a := w.Objects()[0]
+		aM := a.Material()
+		aM.Ambient = 1.0
+		aM.Pattern = object.NewTestPattern()
+		a.SetMaterial(aM)
+
+		b := w.Objects()[1]
+		bM := b.Material()
+		bM.Transparency = 1.0
+		bM.RefractiveIndex = 1.5
+		b.SetMaterial(bM)
+
+		r := ray.NewRayAt(ray.NewPoint(0, 0, 0.1), ray.NewVec(0, 1, 0))
+
+		xs := scene.Intersections{
+			{T: -0.9899, Obj: a},
+			{T: -0.4899, Obj: b},
+			{T: 0.4899, Obj: b},
+			{T: 0.9899, Obj: a},
+		}
+
+		comps := scene.PrepareComputations(xs[2], r, xs...)
+		c := scene.RefractedColor(w, comps, 5)
+		t.Log(c)
+		assertColorEqual(t, object.NewColor(0, 0.99888, 0.04725), c)
+	})
+}
+
+func TestShadeHitWithATransparentMaterial(t *testing.T) {
+	w := scene.DefaultWorld()
+
+	floor := object.NewPlane()
+	floor.SetTransform(ray.Translation(0, -1, 0))
+	floorM := floor.Material()
+	floorM.Transparency = 0.5
+	floorM.RefractiveIndex = 1.5
+	floor.SetMaterial(floorM)
+	w.AddObject(floor)
+
+	ball := object.DefaultSphere()
+	ball.SetTransform(ray.Translation(0, -3.5, -0.5))
+	ballM := ball.Material()
+	ballM.Color = object.NewColor(1, 0, 0)
+	ballM.Ambient = 0.5
+	ball.SetMaterial(ballM)
+	w.AddObject(ball)
+
+	r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
+	xs := scene.Intersections{
+		{T: math.Sqrt(2), Obj: floor},
+	}
+
+	comps := scene.PrepareComputations(xs[0], r, xs...)
+	color := scene.ShadeHit(w, comps, 5)
+	assertColorEqual(t, object.NewColor(0.93642, 0.68642, 0.68642), color)
+}
+
 func TestShadeHitWithAnIntersectionInShadow(t *testing.T) {
 	w := scene.NewWorld()
 	w.AddLight(object.NewPointLight(ray.NewPoint(0, 0, -10), object.NewColor(1, 1, 1)))

@@ -82,6 +82,22 @@ func NewSphere(center ray.Vector, radius float64) Object {
 	}
 }
 
+func NewGlassSphere(center ray.Vector, radius float64) Object {
+	material := DefaultMaterial()
+	material.Transparency = 1.0
+	material.RefractiveIndex = 1.5
+	return &sphere{
+		c: center,
+		r: radius,
+		t: ray.DefaultIdentityMatrix(),
+		m: material,
+	}
+}
+
 func DefaultSphere() Object {
 	return NewSphere(ray.NewPoint(0, 0, 0), 1)
+}
+
+func DefaultGlassSphere() Object {
+	return NewGlassSphere(ray.NewPoint(0, 0, 0), 1)
 }
