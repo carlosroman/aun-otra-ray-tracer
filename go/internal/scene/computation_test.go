@@ -170,3 +170,52 @@ func TestComputation_Reflectv(t *testing.T) {
 	actual := scene.PrepareComputations(i, r)
 	assert.Equal(t, ray.NewVec(0, math.Sqrt(2)/2, math.Sqrt(2)/2), actual.Reflectv())
 }
+
+func TestSchlick(t *testing.T) {
+
+	shape := object.DefaultGlassSphere()
+	testCases := []struct {
+		name     string
+		xs       scene.Intersections
+		expected float64
+		r        ray.Ray
+		idx      int
+	}{
+		{
+			name: "The Schlick approximation under total internal reflection",
+			xs: scene.Intersections{
+				{T: -math.Sqrt(2) / 2, Obj: shape},
+				{T: math.Sqrt(2) / 2, Obj: shape},
+			},
+			r:        ray.NewRayAt(ray.NewPoint(0, 0, math.Sqrt(2)/2), ray.NewVec(0, 1, 0)),
+			idx:      1,
+			expected: 1.0,
+		},
+		{
+			name: "The Schlick approximation with a perpendicular viewing angle",
+			xs: scene.Intersections{
+				{T: -1, Obj: shape},
+				{T: 1, Obj: shape},
+			},
+			r:        ray.NewRayAt(ray.NewPoint(0, 0, 0), ray.NewVec(0, 1, 0)),
+			idx:      1,
+			expected: 0.04,
+		},
+		{
+			name: "The Schlick approximation with small angle and n2 > n1",
+			xs: scene.Intersections{
+				{T: 1.8589, Obj: shape},
+			},
+			r:        ray.NewRayAt(ray.NewPoint(0, 0.99, -2), ray.NewVec(0, 0, 1)),
+			idx:      0,
+			expected: 0.48873,
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			comps := scene.PrepareComputations(tt.xs[tt.idx], tt.r, tt.xs...)
+			reflectance := scene.Schlick(comps)
+			assert.InDelta(t, tt.expected, reflectance, 0.00001)
+		})
+	}
+}

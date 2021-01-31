@@ -46,13 +46,14 @@ func (w *world) AddLight(light object.PointLight) {
 }
 
 func (w *world) ColorAt(r ray.Ray, remaining int) (color object.RGB) {
-	hit := Hit(Intersect(w, r))
+	intersections := Intersect(w, r)
+	hit := Hit(intersections)
 	if hit == NoHit {
 		return color
 	}
 	return ShadeHit(
 		w,
-		PrepareComputations(hit, r),
+		PrepareComputations(hit, r, intersections...),
 		remaining)
 }
 
@@ -101,14 +102,26 @@ func Intersect(w World, r ray.Ray) (intersections Intersections) {
 }
 
 func ShadeHit(w World, comps Computation, remaining int) object.RGB {
-	return object.Lighting(
+	reflected := ReflectedColor(w, comps, remaining)
+	refracted := RefractedColor(w, comps, remaining)
+
+	surface := object.Lighting(
 		comps.obj.Material(),
 		comps.obj,
 		w.Light(),
 		comps.overPoint, comps.eyev, comps.normalv,
-		w.IsShadowed(comps.overPoint)).
-		Add(ReflectedColor(w, comps, remaining)).
-		Add(RefractedColor(w, comps, remaining))
+		w.IsShadowed(comps.overPoint))
+
+	if comps.obj.Material().Reflective > 0 &&
+		comps.obj.Material().Transparency > 0 {
+		reflectance := Schlick(comps)
+		return surface.
+			Add(reflected.MultiplyBy(reflectance)).
+			Add(refracted.MultiplyBy(1 - reflectance))
+	}
+	return surface.
+		Add(reflected).
+		Add(refracted)
 }
 
 func ReflectedColor(w World, comps Computation, remaining int) object.RGB {

@@ -296,6 +296,37 @@ func TestShadeHitWithATransparentMaterial(t *testing.T) {
 	assertColorEqual(t, object.NewColor(0.93642, 0.68642, 0.68642), color)
 }
 
+func TestShadeHitWithAReflectiveTransparentMaterial(t *testing.T) {
+
+	w := scene.DefaultWorld()
+
+	floor := object.NewPlane()
+	floor.SetTransform(ray.Translation(0, -1, 0))
+	floorM := floor.Material()
+	floorM.Reflective = 0.5
+	floorM.Transparency = 0.5
+	floorM.RefractiveIndex = 1.5
+	floor.SetMaterial(floorM)
+	w.AddObject(floor)
+
+	ball := object.DefaultSphere()
+	ball.SetTransform(ray.Translation(0, -3.5, -0.5))
+	ballM := ball.Material()
+	ballM.Color = object.NewColor(1, 0, 0)
+	ballM.Ambient = 0.5
+	ball.SetMaterial(ballM)
+	w.AddObject(ball)
+
+	r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
+	xs := scene.Intersections{
+		{T: math.Sqrt(2), Obj: floor},
+	}
+
+	comps := scene.PrepareComputations(xs[0], r, xs...)
+	color := scene.ShadeHit(w, comps, 5)
+	assertColorEqual(t, object.NewColor(0.93391, 0.69643, 0.69243), color)
+}
+
 func TestShadeHitWithAnIntersectionInShadow(t *testing.T) {
 	w := scene.NewWorld()
 	w.AddLight(object.NewPointLight(ray.NewPoint(0, 0, -10), object.NewColor(1, 1, 1)))

@@ -1,6 +1,8 @@
 package scene
 
 import (
+	"math"
+
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
@@ -119,4 +121,19 @@ func PrepareComputations(i Intersection, r ray.Ray, xs ...Intersection) (comps C
 		}
 	}
 	return comps
+}
+
+func Schlick(comps Computation) float64 {
+	cos := ray.Dot(comps.eyev, comps.normalv)
+	if comps.n1 > comps.n2 {
+		n := comps.n1 / comps.n2
+		sin2t := math.Pow(n, 2) * (1.0 - math.Pow(cos, 2))
+		if sin2t > 1.0 {
+			return 1.0
+		}
+
+		cos = math.Sqrt(1.0 - sin2t)
+	}
+	r0 := math.Pow((comps.n1-comps.n2)/(comps.n1+comps.n2), 2)
+	return r0 + (1-r0)*math.Pow(1-cos, 5)
 }
