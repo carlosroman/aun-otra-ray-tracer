@@ -5,7 +5,7 @@ import (
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
-func DefaultWorld() World {
+func DefaultWorld() (w World, err error) {
 	light := DefaultWorldLight()
 
 	s1 := object.NewSphere(ray.ZeroPoint, 1)
@@ -16,12 +16,14 @@ func DefaultWorld() World {
 	s1.SetMaterial(m1)
 
 	s2 := object.NewSphere(ray.ZeroPoint, 1)
-	s2.SetTransform(ray.Scaling(0.5, 0.5, 0.5))
-
-	w := NewWorld()
+	err = s2.SetTransform(ray.Scaling(0.5, 0.5, 0.5))
+	if err != nil {
+		return nil, err
+	}
+	w = NewWorld()
 	w.AddObjects(s1, s2)
 	w.AddLight(light)
-	return w
+	return w, err
 }
 
 func DefaultWorldLight() object.PointLight {

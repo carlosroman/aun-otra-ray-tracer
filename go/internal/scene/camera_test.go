@@ -12,7 +12,8 @@ import (
 )
 
 func TestNewBasicCamera(t *testing.T) {
-	camera := scene.NewBasicCamera(160, 120, math.Pi/2)
+	camera, err := scene.NewBasicCamera(160, 120, math.Pi/2)
+	require.NoError(t, err)
 	assert.Equal(t, 160, camera.HSize())
 	assert.Equal(t, 120, camera.VSize())
 	assert.Equal(t, math.Pi/2, camera.FieldOfView())
@@ -31,7 +32,8 @@ func TestNewBasicCamera(t *testing.T) {
 //}
 
 func TestNewCamera(t *testing.T) {
-	c := scene.NewCamera(200, 100, defaultFrom, defaultTo, defaultUp)
+	c, err := scene.NewCamera(200, 100, defaultFrom, defaultTo, defaultUp)
+	require.NoError(t, err)
 	assert.Equal(t, 200, c.HSize())
 	assert.Equal(t, 100, c.VSize())
 	assert.Equal(t, ray.NewPoint(0, 0, 0), c.Origin())
@@ -72,9 +74,10 @@ func TestCamera_RayForPixel(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			c := scene.NewBasicCamera(201, 101, math.Pi/2)
+			c, err := scene.NewBasicCamera(201, 101, math.Pi/2)
+			require.NoError(t, err)
 			if tt.transform != nil {
-				c.SetTransform(tt.transform)
+				require.NoError(t, c.SetTransform(tt.transform))
 			}
 			pixel := c.RayForPixel(tt.nx, tt.ny)
 			require.NotNil(t, pixel)
@@ -114,7 +117,8 @@ func TestCamera_PixelSize(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			c := scene.NewBasicCamera(tt.hSize, tt.vSize, math.Pi/2)
+			c, err := scene.NewBasicCamera(tt.hSize, tt.vSize, math.Pi/2)
+			require.NoError(t, err)
 			actual := c.PixelSize()
 			assert.Equal(t, tt.expected, actual)
 		})
@@ -132,8 +136,10 @@ var (
 )
 
 func TestRender(t *testing.T) {
-	w := scene.DefaultWorld()
-	c := scene.NewBasicCamera(11, 11, math.Pi/2)
+	w, err := scene.DefaultWorld()
+	require.NoError(t, err)
+	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
+	require.NoError(t, err)
 	from := ray.NewPoint(0, 0, -5)
 	to := ray.NewPoint(0, 0, 0)
 	up := ray.NewVec(0, 1, 0)
@@ -162,10 +168,11 @@ func TestRender(t *testing.T) {
 var benchImg scene.Canvas
 
 func BenchmarkRender(b *testing.B) {
-
 	var canvas scene.Canvas
-	w := scene.DefaultWorld()
-	c := scene.NewBasicCamera(11, 11, math.Pi/2)
+	w, err := scene.DefaultWorld()
+	require.NoError(b, err)
+	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
+	require.NoError(b, err)
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		canvas = scene.Render(c, w)

@@ -9,27 +9,29 @@ import (
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
-func NewCamera(hSize, vSize int, from, to, vup ray.Vector) Camera {
+func NewCamera(hSize, vSize int, from, to, vup ray.Vector) (c Camera, err error) {
 	return newCamera(hSize, vSize, math.Pi/2, ray.ViewTransform(from, to, vup))
 }
 
-func NewBasicCamera(hSize, vSize int, fieldOfView float64) Camera {
+func NewBasicCamera(hSize, vSize int, fieldOfView float64) (c Camera, err error) {
 	return newCamera(hSize, vSize, fieldOfView, ray.IdentityMatrix(4, 4))
 }
 
-func newCamera(hSize, vSize int, fieldOfView float64, transform ray.Matrix) Camera {
+func newCamera(hSize, vSize int, fieldOfView float64, transform ray.Matrix) (c Camera, err error) {
 	pixelSize, halfWidth, halfHeight := calculatePixelSize(hSize, vSize, fieldOfView)
+	inverse, err := transform.Inverse()
 	return &camera{
-		hSize:       hSize,
-		vSize:       vSize,
-		fieldOfView: fieldOfView,
-		origin:      ray.NewPoint(0, 0, 0),
-		focalLength: 1.0,
-		transform:   transform,
-		pixelSize:   pixelSize,
-		halfWidth:   halfWidth,
-		halfHeight:  halfHeight,
-	}
+		hSize:            hSize,
+		vSize:            vSize,
+		fieldOfView:      fieldOfView,
+		origin:           ray.NewPoint(0, 0, 0),
+		focalLength:      1.0,
+		transform:        transform,
+		transformInverse: inverse,
+		pixelSize:        pixelSize,
+		halfWidth:        halfWidth,
+		halfHeight:       halfHeight,
+	}, err
 }
 
 type Camera interface {
@@ -40,19 +42,20 @@ type Camera interface {
 	FocalLength() float64
 	RayForPixel(nx, ny float64) ray.Ray
 	FieldOfView() float64
-	SetTransform(by ray.Matrix)
+	SetTransform(by ray.Matrix) error
 }
 
 type camera struct {
-	hSize       int
-	vSize       int
-	fieldOfView float64
-	focalLength float64
-	origin      ray.Vector
-	transform   ray.Matrix
-	pixelSize   float64
-	halfWidth   float64
-	halfHeight  float64
+	hSize            int
+	vSize            int
+	fieldOfView      float64
+	focalLength      float64
+	origin           ray.Vector
+	transform        ray.Matrix
+	transformInverse ray.Matrix
+	pixelSize        float64
+	halfWidth        float64
+	halfHeight       float64
 }
 
 func (c camera) HSize() int {
@@ -90,8 +93,11 @@ func (c camera) PixelSize() float64 {
 	return c.pixelSize
 }
 
-func (c *camera) SetTransform(by ray.Matrix) {
+func (c *camera) SetTransform(by ray.Matrix) error {
 	c.transform = by
+	inverse, err := by.Inverse()
+	c.transformInverse = inverse
+	return err
 }
 
 func (c camera) RayForPixel(nx, ny float64) ray.Ray {
@@ -110,7 +116,7 @@ func (c camera) RayForPixel(nx, ny float64) ray.Ray {
 	// (remember that the canvas is at z=-1)
 
 	// pixel ← inverse(camera.transform) * point(world_x, world_y, -1)
-	inv, _ := c.transform.Inverse()
+	inv := c.transformInverse
 	pixel := inv.MultiplyByVector(ray.NewPoint(worldX, worldY, -c.focalLength))
 	origin := inv.MultiplyByVector(c.origin)
 	// lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length)

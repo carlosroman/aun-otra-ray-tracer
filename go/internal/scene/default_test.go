@@ -3,10 +3,12 @@ package scene_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/scene"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultWorld(t *testing.T) {
@@ -21,9 +23,10 @@ func TestDefaultWorld(t *testing.T) {
 	s1.SetMaterial(m1)
 
 	s2 := object.NewSphere(ray.ZeroPoint, 1)
-	s2.SetTransform(ray.Scaling(0.5, 0.5, 0.5))
+	require.NoError(t, s2.SetTransform(ray.Scaling(0.5, 0.5, 0.5)))
 
-	w := scene.DefaultWorld()
+	w, err := scene.DefaultWorld()
+	require.NoError(t, err)
 
 	assert.Len(t, w.Objects(), 2)
 	assert.Contains(t, w.Objects(), s1)

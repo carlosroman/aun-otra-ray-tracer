@@ -101,7 +101,8 @@ func TestShadeHit(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			// Given
-			w := scene.DefaultWorld()
+			w, err := scene.DefaultWorld()
+			require.NoError(t, err)
 			if tt.light != emptyLight {
 				w.AddLight(tt.light)
 			}
@@ -110,7 +111,7 @@ func TestShadeHit(t *testing.T) {
 				shape := object.NewPlane()
 				material := shape.Material()
 				material.Reflective = 0.5
-				shape.SetTransform(ray.Translation(0, -1, 0))
+				require.NoError(t, shape.SetTransform(ray.Translation(0, -1, 0)))
 				shape.SetMaterial(material)
 				w.AddObject(shape)
 			}
@@ -128,7 +129,8 @@ func TestShadeHit(t *testing.T) {
 
 func TestReflectedColor(t *testing.T) {
 	t.Run("The reflected color for a nonreflective material", func(t *testing.T) {
-		w := scene.DefaultWorld()
+		w, err := scene.DefaultWorld()
+		require.NoError(t, err)
 		shape := w.Objects()[1]
 		material := shape.Material()
 		material.Ambient = 1
@@ -141,12 +143,13 @@ func TestReflectedColor(t *testing.T) {
 	})
 
 	t.Run("The reflected color for a reflective material", func(t *testing.T) {
-		w := scene.DefaultWorld()
+		w, err := scene.DefaultWorld()
+		require.NoError(t, err)
 		r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
 		shape := object.NewPlane()
 		material := shape.Material()
 		material.Reflective = 0.5
-		shape.SetTransform(ray.Translation(0, -1, 0))
+		require.NoError(t, shape.SetTransform(ray.Translation(0, -1, 0)))
 		shape.SetMaterial(material)
 		w.AddObject(shape)
 		i := scene.Intersection{T: math.Sqrt(2), Obj: shape}
@@ -156,13 +159,14 @@ func TestReflectedColor(t *testing.T) {
 	})
 
 	t.Run("The reflected color at the maximum recursive depth", func(t *testing.T) {
-		w := scene.DefaultWorld()
+		w, err := scene.DefaultWorld()
+		require.NoError(t, err)
 
 		r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
 		shape := object.NewPlane()
 		material := shape.Material()
 		material.Reflective = 0.5
-		shape.SetTransform(ray.Translation(0, -1, 0))
+		require.NoError(t, shape.SetTransform(ray.Translation(0, -1, 0)))
 		shape.SetMaterial(material)
 		w.AddObject(shape)
 
@@ -215,7 +219,8 @@ func TestRefractedColor(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			w := scene.DefaultWorld()
+			w, err := scene.DefaultWorld()
+			require.NoError(t, err)
 			shape := w.Objects()[0]
 			shapeM := shape.Material()
 			if tt.refractiveIndex != 0 {
@@ -237,7 +242,8 @@ func TestRefractedColor(t *testing.T) {
 
 	t.Run("The refracted color with a refracted ray", func(t *testing.T) {
 
-		w := scene.DefaultWorld()
+		w, err := scene.DefaultWorld()
+		require.NoError(t, err)
 
 		a := w.Objects()[0]
 		aM := a.Material()
@@ -268,7 +274,9 @@ func TestRefractedColor(t *testing.T) {
 }
 
 func TestShadeHitWithATransparentMaterial(t *testing.T) {
-	w := scene.DefaultWorld()
+
+	w, err := scene.DefaultWorld()
+	require.NoError(t, err)
 
 	floor := object.NewPlane()
 	floor.SetTransform(ray.Translation(0, -1, 0))
@@ -298,7 +306,8 @@ func TestShadeHitWithATransparentMaterial(t *testing.T) {
 
 func TestShadeHitWithAReflectiveTransparentMaterial(t *testing.T) {
 
-	w := scene.DefaultWorld()
+	w, err := scene.DefaultWorld()
+	require.NoError(t, err)
 
 	floor := object.NewPlane()
 	floor.SetTransform(ray.Translation(0, -1, 0))
@@ -370,7 +379,8 @@ func TestWorld_ColorAt(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			// Given default world
-			w := scene.DefaultWorld()
+			w, err := scene.DefaultWorld()
+			require.NoError(t, err)
 			if tt.ambient > 0 {
 				for i := range w.Objects() {
 					obj := w.Objects()[i]
@@ -386,7 +396,8 @@ func TestWorld_ColorAt(t *testing.T) {
 	}
 
 	t.Run("With mutually reflective surfaces", func(t *testing.T) {
-		w := scene.DefaultWorld()
+		w, err := scene.DefaultWorld()
+		require.NoError(t, err)
 		w.AddLight(object.NewPointLight(ray.ZeroPoint, object.NewColor(1, 1, 1)))
 		lower := object.NewPlane()
 		mLower := lower.Material()
@@ -484,7 +495,8 @@ func TestWorld_IsShadowed(t *testing.T) {
 		},
 	}
 
-	w := scene.DefaultWorld()
+	w, err := scene.DefaultWorld()
+	require.NoError(t, err)
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			actual := w.IsShadowed(tt.point)
