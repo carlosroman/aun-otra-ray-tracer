@@ -93,7 +93,7 @@ func NewGlassSphere(center ray.Vector, radius float64) Object {
 		c:    center,
 		r:    radius,
 		t:    ray.DefaultIdentityMatrix(),
-		tInv: ray.DefaultIdentityMatrix(),
+		tInv: ray.DefaultIdentityMatrixInverse(),
 		m:    material,
 	}
 }
