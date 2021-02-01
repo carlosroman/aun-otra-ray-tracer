@@ -7,6 +7,7 @@ import (
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStripePattern_At(t *testing.T) {
@@ -134,11 +135,11 @@ func TestStripePattern_AtObj(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			obj := object.NewSphere(ray.NewPoint(0, 0, 0), 1)
 			if tt.objTransform != nil {
-				obj.SetTransform(tt.objTransform)
+				require.NoError(t, obj.SetTransform(tt.objTransform))
 			}
 
 			if tt.patternTransform != nil {
-				tt.pattern.Transform = tt.patternTransform
+				require.NoError(t, tt.pattern.SetTransform(tt.patternTransform))
 			}
 			actual := tt.pattern.AtObj(obj, tt.point)
 			assertColorEqual(t, tt.expected, actual)
@@ -207,12 +208,12 @@ func TestNewTestPattern(t *testing.T) {
 			shape := object.NewSphere(ray.ZeroPoint, 1)
 
 			if tt.shapeTransform != nil {
-				shape.SetTransform(tt.shapeTransform)
+				require.NoError(t, shape.SetTransform(tt.shapeTransform))
 			}
 
 			pattern := object.NewTestPattern()
 			if tt.patternTransform != nil {
-				pattern.Transform = tt.patternTransform
+				require.NoError(t, pattern.SetTransform(tt.patternTransform))
 			}
 
 			actual := pattern.AtObj(shape, tt.point)

@@ -8,20 +8,24 @@ import (
 )
 
 type Pattern struct {
-	Transform  ray.Matrix
-	At         func(point ray.Vector) RGB
-	IsNotEmpty bool
+	Transform        ray.Matrix
+	TransformInverse ray.Matrix
+	At               func(point ray.Vector) RGB
+	IsNotEmpty       bool
 }
 
 func (p Pattern) AtObj(obj Object, worldPoint ray.Vector) RGB {
 	objInv := obj.TransformInverse()
-	patternInv, err := p.Transform.Inverse()
-	if err != nil {
-		return RGB{}
-	}
 	objPoint := objInv.MultiplyByVector(worldPoint)
-	patternPoint := patternInv.MultiplyByVector(objPoint)
+	patternPoint := p.TransformInverse.MultiplyByVector(objPoint)
 	return p.At(patternPoint)
+}
+
+func (p *Pattern) SetTransform(transform ray.Matrix) error {
+	p.Transform = transform
+	inverse, err := transform.Inverse()
+	p.TransformInverse = inverse
+	return err
 }
 
 type StripePattern struct {
@@ -31,7 +35,8 @@ type StripePattern struct {
 
 func EmptyPattern() Pattern {
 	return Pattern{
-		Transform: ray.DefaultIdentityMatrix(),
+		Transform:        ray.DefaultIdentityMatrix(),
+		TransformInverse: ray.DefaultIdentityMatrixInverse(),
 		At: func(_ ray.Vector) RGB {
 			return Black
 		},
@@ -53,7 +58,7 @@ func NewTestPattern() (p Pattern) {
 	p = Pattern{
 		IsNotEmpty: true,
 	}
-	p.Transform = ray.DefaultIdentityMatrix()
+	_ = p.SetTransform(ray.DefaultIdentityMatrix())
 	p.At = func(point ray.Vector) RGB {
 		return RGB{
 			R: point.GetX(),
