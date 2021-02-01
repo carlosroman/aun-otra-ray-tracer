@@ -13,7 +13,8 @@ type Object interface {
 	LocalNormalAt(worldPoint ray.Vector) ray.Vector
 
 	Transform() ray.Matrix
-	SetTransform(t ray.Matrix)
+	TransformInverse() ray.Matrix
+	SetTransform(t ray.Matrix) error
 
 	Material() (m Material)
 	SetMaterial(m Material)

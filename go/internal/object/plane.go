@@ -11,16 +11,24 @@ var (
 )
 
 type plane struct {
-	t ray.Matrix
-	m Material
+	t    ray.Matrix
+	tInv ray.Matrix
+	m    Material
 }
 
 func (p plane) Transform() ray.Matrix {
 	return p.t
 }
 
-func (p *plane) SetTransform(t ray.Matrix) {
+func (p *plane) SetTransform(t ray.Matrix) error {
 	p.t = t
+	inverse, err := t.Inverse()
+	p.tInv = inverse
+	return err
+}
+
+func (p plane) TransformInverse() ray.Matrix {
+	return p.tInv
 }
 
 func (p plane) Material() Material {
@@ -46,7 +54,8 @@ func (p plane) LocalNormalAt(_ ray.Vector) ray.Vector {
 
 func NewPlane() Object {
 	return &plane{
-		t: ray.DefaultIdentityMatrix(),
-		m: DefaultMaterial(),
+		t:    ray.DefaultIdentityMatrix(),
+		tInv: ray.DefaultIdentityMatrix(),
+		m:    DefaultMaterial(),
 	}
 }

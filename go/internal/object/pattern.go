@@ -14,10 +14,7 @@ type Pattern struct {
 }
 
 func (p Pattern) AtObj(obj Object, worldPoint ray.Vector) RGB {
-	objInv, err := obj.Transform().Inverse()
-	if err != nil {
-		return RGB{}
-	}
+	objInv := obj.TransformInverse()
 	patternInv, err := p.Transform.Inverse()
 	if err != nil {
 		return RGB{}

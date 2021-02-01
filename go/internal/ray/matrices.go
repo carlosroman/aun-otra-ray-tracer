@@ -181,6 +181,11 @@ func DefaultIdentityMatrix() (identityMatrix Matrix) {
 	return IdentityMatrix(defaultIdentityMatrixSize, defaultIdentityMatrixSize)
 }
 
+func DefaultIdentityMatrixInverse() (identityMatrixInverse Matrix) {
+	identityMatrixInverse, _ = DefaultIdentityMatrix().Inverse()
+	return identityMatrixInverse
+}
+
 func IdentityMatrix(rows, cols int) (identityMatrix Matrix) {
 	identityMatrix = NewMatrix(rows, cols)
 
