@@ -15,10 +15,9 @@ type sphere struct {
 }
 
 func NormalAt(obj Object, worldPoint ray.Vector) ray.Vector {
-	inv := obj.TransformInverse()
-	localPoint := inv.MultiplyByVector(worldPoint)
+	localPoint := obj.TransformInverse().MultiplyByVector(worldPoint)
 	localNormal := obj.LocalNormalAt(localPoint)
-	return inv.
+	return obj.TransformInverse().
 		Transpose().
 		MultiplyByVector(localNormal).
 		SetW(0).
@@ -30,8 +29,9 @@ func (s sphere) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
 }
 
 func Intersect(obj Object, rr ray.Ray) []float64 {
-	inv := obj.TransformInverse()
-	return obj.LocalIntersect(rr.Transform(inv))
+	return obj.
+		LocalIntersect(
+			rr.Transform(obj.TransformInverse()))
 }
 
 func (s *sphere) LocalIntersect(r ray.Ray) []float64 {
