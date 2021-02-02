@@ -1,7 +1,6 @@
 package object
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
@@ -73,7 +72,6 @@ func NewGradientPattern(a, b RGB) (p Pattern) {
 	p = NewTestPattern()
 	d := b.Subtract(a)
 	p.At = func(point ray.Vector) RGB {
-		fmt.Println(point)
 		fraction := point.GetX() - math.Floor(point.GetX())
 		return a.Add(d.MultiplyBy(fraction))
 	}
