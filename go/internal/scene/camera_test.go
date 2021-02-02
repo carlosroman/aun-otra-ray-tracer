@@ -19,18 +19,6 @@ func TestNewBasicCamera(t *testing.T) {
 	assert.Equal(t, math.Pi/2, camera.FieldOfView())
 }
 
-//
-//func TestCamera_Render_imageSizeCorrect(t *testing.T) {
-//	c := scene.NewCamera(200, 100, defaultFrom, defaultTo, defaultUp)
-//
-//	i := scene.Render(c, &stubWorld{})
-//	require.NotNil(t, i)
-//	assert.Equal(t, 200, i.Rect.Dx())
-//	assert.Equal(t, 100, i.Rect.Dy())
-//	assert.Equal(t, 0, i.Rect.Min.X)
-//	assert.Equal(t, 0, i.Rect.Min.Y)
-//}
-
 func TestNewCamera(t *testing.T) {
 	c, err := scene.NewCamera(200, 100, defaultFrom, defaultTo, defaultUp)
 	require.NoError(t, err)
@@ -125,10 +113,6 @@ func TestCamera_PixelSize(t *testing.T) {
 	}
 }
 
-type stubWorld struct {
-	scene.World
-}
-
 var (
 	defaultFrom = ray.NewPoint(0, 0, 0)
 	defaultTo   = ray.NewPoint(0, 0, -1)
@@ -143,7 +127,7 @@ func TestRender(t *testing.T) {
 	from := ray.NewPoint(0, 0, -5)
 	to := ray.NewPoint(0, 0, 0)
 	up := ray.NewVec(0, 1, 0)
-	c.SetTransform(ray.ViewTransform(from, to, up))
+	require.NoError(t, c.SetTransform(ray.ViewTransform(from, to, up)))
 
 	testCases := []struct {
 		name string
