@@ -7,32 +7,7 @@ import (
 )
 
 type cube struct {
-	t    ray.Matrix
-	tInv ray.Matrix
-	m    Material
-}
-
-func (c cube) Transform() ray.Matrix {
-	return c.t
-}
-
-func (c *cube) SetTransform(t ray.Matrix) error {
-	c.t = t
-	inverse, err := t.Inverse()
-	c.tInv = inverse
-	return err
-}
-
-func (c cube) TransformInverse() ray.Matrix {
-	return c.tInv
-}
-
-func (c cube) Material() Material {
-	return c.m
-}
-
-func (c *cube) SetMaterial(m Material) {
-	c.m = m
+	obj
 }
 
 func (c cube) LocalIntersect(ray ray.Ray) []float64 {
@@ -80,9 +55,8 @@ func (c cube) LocalNormalAt(point ray.Vector) ray.Vector {
 }
 
 func NewCube() Object {
-	return &cube{
-		t:    ray.DefaultIdentityMatrix(),
-		tInv: ray.DefaultIdentityMatrixInverse(),
-		m:    DefaultMaterial(),
-	}
+	c := cube{}
+	_ = c.SetTransform(ray.DefaultIdentityMatrix())
+	c.m = DefaultMaterial()
+	return &c
 }
