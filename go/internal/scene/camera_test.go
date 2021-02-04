@@ -4,11 +4,12 @@ import (
 	"math"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/scene"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNewBasicCamera(t *testing.T) {
@@ -120,6 +121,23 @@ var (
 )
 
 func TestRender(t *testing.T) {
+	w, c := setupRenderTest(t)
+	img := scene.Render(c, w)
+	assertRenderImg(t, img)
+}
+
+func TestMultiThreadedRender(t *testing.T) {
+	w, c := setupRenderTest(t)
+	img := scene.MultiThreadedRender(c, w, 10, 100)
+	assertRenderImg(t, img)
+}
+
+func assertRenderImg(t *testing.T, img scene.Canvas) {
+	assert.NotNil(t, img)
+	assertColorEqual(t, object.NewColor(0.38066, 0.47583, 0.2855), img[5][5])
+}
+
+func setupRenderTest(t *testing.T) (scene.World, scene.Camera) {
 	w, err := scene.DefaultWorld()
 	require.NoError(t, err)
 	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
@@ -128,25 +146,7 @@ func TestRender(t *testing.T) {
 	to := ray.NewPoint(0, 0, 0)
 	up := ray.NewVec(0, 1, 0)
 	require.NoError(t, c.SetTransform(ray.ViewTransform(from, to, up)))
-
-	testCases := []struct {
-		name string
-		img  scene.Canvas
-	}{
-		{
-			name: "Simple",
-			img:  scene.Render(c, w),
-		},
-		{
-			name: "MultiThreaded",
-			img:  scene.MultiThreadedRender(c, w, 10, 100),
-		},
-	}
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
-			assertColorEqual(t, object.NewColor(0.38066, 0.47583, 0.2855), tt.img[5][5])
-		})
-	}
+	return w, c
 }
 
 var benchImg scene.Canvas
@@ -160,6 +160,19 @@ func BenchmarkRender(b *testing.B) {
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		canvas = scene.Render(c, w)
+	}
+	benchImg = canvas
+}
+
+func BenchmarkMultiThreadedRender(b *testing.B) {
+	var canvas scene.Canvas
+	w, err := scene.DefaultWorld()
+	require.NoError(b, err)
+	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
+	require.NoError(b, err)
+	b.ReportAllocs()
+	for n := 0; n < b.N; n++ {
+		canvas = scene.MultiThreadedRender(c, w, 10, 100)
 	}
 	benchImg = canvas
 }

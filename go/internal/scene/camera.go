@@ -1,7 +1,6 @@
 package scene
 
 import (
-	"context"
 	"math"
 	"sync"
 
@@ -140,20 +139,20 @@ func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
 	}
 	ch := make(chan result, queueSize)
 	calcCh := make(chan result, queueSize)
+	done := make(chan bool)
 	wg := sync.WaitGroup{}
 	wg.Add(noOfWorkers)
-	ctx, cancelFunc := context.WithCancel(context.Background())
+
+	wgCanvas := sync.WaitGroup{}
+	wgCanvas.Add(c.HSize() * c.VSize())
 
 	go func() {
-		for {
-			select {
-			case out := <-ch:
-				canvas[out.x][out.y] = out.color
-			case <-ctx.Done():
-				close(ch)
-				return
-			}
+		for out := range ch {
+			canvas[out.x][out.y] = out.color
+			wgCanvas.Done()
 		}
+
+		done <- true
 	}()
 
 	for workers := 0; workers < noOfWorkers; workers++ {
@@ -176,7 +175,10 @@ func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
 	}
 	close(calcCh)
 	wg.Wait()
-	cancelFunc()
+	wgCanvas.Done()
+	close(ch)
+	<-done
+	close(done)
 	return canvas
 }
 
