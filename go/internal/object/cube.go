@@ -10,10 +10,10 @@ type cube struct {
 	obj
 }
 
-func (c cube) LocalIntersect(ray ray.Ray) []float64 {
-	xtmin, xtmax := checkAxis(ray.Origin().GetX(), ray.Direction().GetX())
-	ytmin, ytmax := checkAxis(ray.Origin().GetY(), ray.Direction().GetY())
-	ztmin, ztmax := checkAxis(ray.Origin().GetZ(), ray.Direction().GetZ())
+func (c cube) LocalIntersect(r ray.Ray) []float64 {
+	xtmin, xtmax := checkAxis(r.Origin().GetX(), r.Direction().GetX())
+	ytmin, ytmax := checkAxis(r.Origin().GetY(), r.Direction().GetY())
+	ztmin, ztmax := checkAxis(r.Origin().GetZ(), r.Direction().GetZ())
 
 	tmax := math.Min(math.Min(xtmax, ytmax), ztmax)
 	tmin := math.Max(math.Max(xtmin, ytmin), ztmin)
