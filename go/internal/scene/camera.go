@@ -140,16 +140,16 @@ func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
 	ch := make(chan result, queueSize)
 	calcCh := make(chan result, queueSize)
 	done := make(chan bool)
-	wg := sync.WaitGroup{}
-	wg.Add(noOfWorkers)
+	workersWg := sync.WaitGroup{}
+	workersWg.Add(noOfWorkers)
 
-	wgCanvas := sync.WaitGroup{}
-	wgCanvas.Add(c.HSize() * c.VSize())
+	canvasWg := sync.WaitGroup{}
+	canvasWg.Add(c.HSize() * c.VSize())
 
 	go func() {
 		for out := range ch {
 			canvas[out.x][out.y] = out.color
-			wgCanvas.Done()
+			canvasWg.Done()
 		}
 
 		done <- true
@@ -162,7 +162,7 @@ func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
 				res.color = w.ColorAt(r, defaultRecursiveDepth)
 				ch <- res
 			}
-			wg.Done()
+			workersWg.Done()
 		}()
 	}
 	for y := 0; y < c.VSize()-1; y++ {
@@ -174,8 +174,8 @@ func MultiThreadedRender(c Camera, w World, noOfWorkers, queueSize int) Canvas {
 		}
 	}
 	close(calcCh)
-	wg.Wait()
-	wgCanvas.Done()
+	workersWg.Wait()
+	canvasWg.Done()
 	close(ch)
 	<-done
 	close(done)
