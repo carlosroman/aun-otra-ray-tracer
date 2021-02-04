@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	epsilon = 0.00000001
+	epsilon = 1e-5
 )
 
 type Object interface {
