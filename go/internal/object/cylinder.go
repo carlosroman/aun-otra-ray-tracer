@@ -77,8 +77,8 @@ func (c cylinder) intersectCaps(r ray.Ray, xs []float64) []float64 {
 	}
 
 	return xs
-
 }
+
 func (c cylinder) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
 
 	dist := math.Pow(worldPoint.GetX(), 2) + math.Pow(worldPoint.GetZ(), 2)
@@ -95,13 +95,7 @@ func (c cylinder) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
 }
 
 func DefaultCylinder() Object {
-	c := cylinder{
-		minimum: math.Inf(-1),
-		maximum: math.Inf(1),
-	}
-	_ = c.SetTransform(ray.DefaultIdentityMatrix())
-	c.m = DefaultMaterial()
-	return &c
+	return NewCylinder(math.Inf(-1), math.Inf(1), false)
 }
 
 func NewCylinder(minimum, maximum float64, closed bool) Object {
