@@ -4,10 +4,11 @@ import (
 	"math"
 	"testing"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
 func TestNewTestShape(t *testing.T) {
@@ -34,4 +35,19 @@ func TestNewTestShape(t *testing.T) {
 		n := object.NormalAt(s, ray.NewPoint(0, math.Sqrt(2)/2, -math.Sqrt(2)/2))
 		assertVec(t, ray.NewVec(0, 0.97014, -0.24254), n)
 	})
+}
+
+func TestObj_Parent(t *testing.T) {
+	s := object.NewTestShape()
+	require.Nil(t, s.Parent())
+	g := object.NewGroup()
+	s.SetParent(&g)
+	actual := s.Parent()
+	assert.NotNil(t, actual)
+	assert.Equal(t, &g, actual)
+}
+
+func assertIntersection(t *testing.T, expectedT float64, expectedObj object.Object, actual object.Intersection, msg ...string) {
+	assert.InDelta(t, expectedT, actual.T, 0.00001, msg)
+	assert.Equal(t, expectedObj, actual.Obj, msg)
 }

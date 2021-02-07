@@ -10,7 +10,7 @@ type cube struct {
 	obj
 }
 
-func (c cube) LocalIntersect(r ray.Ray) []float64 {
+func (c cube) LocalIntersect(r ray.Ray) Intersections {
 	xtmin, xtmax := checkAxis(r.Origin().GetX(), r.Direction().GetX())
 	ytmin, ytmax := checkAxis(r.Origin().GetY(), r.Direction().GetY())
 	ztmin, ztmax := checkAxis(r.Origin().GetZ(), r.Direction().GetZ())
@@ -21,7 +21,7 @@ func (c cube) LocalIntersect(r ray.Ray) []float64 {
 	if tmin > tmax {
 		return nil
 	}
-	return []float64{tmin, tmax}
+	return []Intersection{{T: tmin, Obj: &c}, {T: tmax, Obj: &c}}
 }
 
 func checkAxis(origin, direction float64) (tmin, tmax float64) {

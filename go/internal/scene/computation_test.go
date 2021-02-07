@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
 	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
@@ -76,10 +77,10 @@ func TestPrepareComputations(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.expectedObjectTranslation != nil {
-				tt.expectedObject.SetTransform(tt.expectedObjectTranslation)
+				require.NoError(t, tt.expectedObject.SetTransform(tt.expectedObjectTranslation))
 			}
 			// Given
-			i := scene.Intersection{
+			i := object.Intersection{
 				T:   tt.intersectT,
 				Obj: tt.expectedObject,
 			}
@@ -109,31 +110,31 @@ func TestPrepareComputations(t *testing.T) {
 	t.Run("Finding n1 and n2 at various intersections", func(t *testing.T) {
 		// GIVEN
 		a := object.DefaultGlassSphere()
-		a.SetTransform(ray.Scaling(2, 2, 2))
+		require.NoError(t, a.SetTransform(ray.Scaling(2, 2, 2)))
 		aM := a.Material()
 		aM.RefractiveIndex = 1.5
 		a.SetMaterial(aM)
 
 		b := object.DefaultGlassSphere()
-		b.SetTransform(ray.Translation(0, 0, -0.25))
+		require.NoError(t, b.SetTransform(ray.Translation(0, 0, -0.25)))
 		bM := b.Material()
 		bM.RefractiveIndex = 2.0
 		b.SetMaterial(bM)
 
 		c := object.DefaultGlassSphere()
-		c.SetTransform(ray.Translation(0, 0, 0.25))
+		require.NoError(t, c.SetTransform(ray.Translation(0, 0, 0.25)))
 		cM := c.Material()
 		cM.RefractiveIndex = 2.5
 		c.SetMaterial(cM)
 
 		r := ray.NewRayAt(ray.NewPoint(0, 0, -4), ray.NewVec(0, 0, 1))
-		xs := scene.Intersections{
-			scene.Intersection{T: 2, Obj: a},
-			scene.Intersection{T: 2.75, Obj: b},
-			scene.Intersection{T: 3.25, Obj: c},
-			scene.Intersection{T: 4.75, Obj: b},
-			scene.Intersection{T: 5.25, Obj: c},
-			scene.Intersection{T: 6, Obj: a},
+		xs := object.Intersections{
+			object.Intersection{T: 2, Obj: a},
+			object.Intersection{T: 2.75, Obj: b},
+			object.Intersection{T: 3.25, Obj: c},
+			object.Intersection{T: 4.75, Obj: b},
+			object.Intersection{T: 5.25, Obj: c},
+			object.Intersection{T: 6, Obj: a},
 		}
 
 		// WHEN
@@ -163,7 +164,7 @@ func TestComputation_Reflectv(t *testing.T) {
 	r := ray.NewRayAt(
 		ray.NewPoint(0, 1, -1),
 		ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
-	i := scene.Intersection{
+	i := object.Intersection{
 		T:   math.Sqrt(2),
 		Obj: shape,
 	}
@@ -176,14 +177,14 @@ func TestSchlick(t *testing.T) {
 	shape := object.DefaultGlassSphere()
 	testCases := []struct {
 		name     string
-		xs       scene.Intersections
+		xs       object.Intersections
 		expected float64
 		r        ray.Ray
 		idx      int
 	}{
 		{
 			name: "The Schlick approximation under total internal reflection",
-			xs: scene.Intersections{
+			xs: object.Intersections{
 				{T: -math.Sqrt(2) / 2, Obj: shape},
 				{T: math.Sqrt(2) / 2, Obj: shape},
 			},
@@ -193,7 +194,7 @@ func TestSchlick(t *testing.T) {
 		},
 		{
 			name: "The Schlick approximation with a perpendicular viewing angle",
-			xs: scene.Intersections{
+			xs: object.Intersections{
 				{T: -1, Obj: shape},
 				{T: 1, Obj: shape},
 			},
@@ -203,7 +204,7 @@ func TestSchlick(t *testing.T) {
 		},
 		{
 			name: "The Schlick approximation with small angle and n2 > n1",
-			xs: scene.Intersections{
+			xs: object.Intersections{
 				{T: 1.8589, Obj: shape},
 			},
 			r:        ray.NewRayAt(ray.NewPoint(0, 0.99, -2), ray.NewVec(0, 0, 1)),

@@ -9,7 +9,7 @@ const (
 )
 
 type Object interface {
-	LocalIntersect(ray ray.Ray) []float64
+	LocalIntersect(ray ray.Ray) Intersections
 	LocalNormalAt(worldPoint ray.Vector) ray.Vector
 
 	Transform() ray.Matrix
@@ -18,6 +18,9 @@ type Object interface {
 
 	Material() (m Material)
 	SetMaterial(m Material)
+
+	Parent() Object
+	SetParent(obj Object)
 }
 
 type BasicObject struct {
@@ -29,14 +32,23 @@ type obj struct {
 	t    ray.Matrix
 	tInv ray.Matrix
 	m    Material
+	p    Object
 }
 
 func (o obj) LocalNormalAt(r ray.Vector) ray.Vector {
 	return r
 }
 
-func (o obj) LocalIntersect(r ray.Ray) []float64 {
+func (o obj) LocalIntersect(r ray.Ray) Intersections {
 	return nil
+}
+
+func (o obj) Parent() Object {
+	return o.p
+}
+
+func (o *obj) SetParent(obj Object) {
+	o.p = obj
 }
 
 func NewTestShape() Object {

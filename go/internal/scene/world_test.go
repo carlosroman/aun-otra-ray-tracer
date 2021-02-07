@@ -116,7 +116,7 @@ func TestShadeHit(t *testing.T) {
 				w.AddObject(shape)
 			}
 			shape := w.Objects()[tt.intersectionShape]
-			comps := scene.PrepareComputations(scene.Intersection{
+			comps := scene.PrepareComputations(object.Intersection{
 				T:   tt.intersectionT,
 				Obj: shape,
 			}, tt.r)
@@ -135,7 +135,7 @@ func TestReflectedColor(t *testing.T) {
 		material := shape.Material()
 		material.Ambient = 1
 		shape.SetMaterial(material)
-		i := scene.Intersection{T: 1, Obj: shape}
+		i := object.Intersection{T: 1, Obj: shape}
 		r := ray.NewRayAt(ray.NewPoint(0, 0, 0), ray.NewVec(0, 0, 1))
 		comps := scene.PrepareComputations(i, r)
 		actual := scene.ReflectedColor(w, comps, 1)
@@ -152,7 +152,7 @@ func TestReflectedColor(t *testing.T) {
 		require.NoError(t, shape.SetTransform(ray.Translation(0, -1, 0)))
 		shape.SetMaterial(material)
 		w.AddObject(shape)
-		i := scene.Intersection{T: math.Sqrt(2), Obj: shape}
+		i := object.Intersection{T: math.Sqrt(2), Obj: shape}
 		comps := scene.PrepareComputations(i, r)
 		actual := scene.ReflectedColor(w, comps, 1)
 		assertColorEqual(t, object.NewColor(0.19032, 0.2379, 0.14274), actual)
@@ -170,7 +170,7 @@ func TestReflectedColor(t *testing.T) {
 		shape.SetMaterial(material)
 		w.AddObject(shape)
 
-		i := scene.Intersection{T: math.Sqrt(2), Obj: shape}
+		i := object.Intersection{T: math.Sqrt(2), Obj: shape}
 		comps := scene.PrepareComputations(i, r)
 		actual := scene.ReflectedColor(w, comps, 0)
 		assertColorEqual(t, object.NewColor(0, 0, 0), actual)
@@ -230,7 +230,7 @@ func TestRefractedColor(t *testing.T) {
 				shapeM.Transparency = tt.transparency
 			}
 			shape.SetMaterial(shapeM)
-			xs := scene.Intersections{
+			xs := object.Intersections{
 				{T: tt.intersectionTs[0], Obj: shape},
 				{T: tt.intersectionTs[1], Obj: shape},
 			}
@@ -259,7 +259,7 @@ func TestRefractedColor(t *testing.T) {
 
 		r := ray.NewRayAt(ray.NewPoint(0, 0, 0.1), ray.NewVec(0, 1, 0))
 
-		xs := scene.Intersections{
+		xs := object.Intersections{
 			{T: -0.9899, Obj: a},
 			{T: -0.4899, Obj: b},
 			{T: 0.4899, Obj: b},
@@ -295,7 +295,7 @@ func TestShadeHitWithATransparentMaterial(t *testing.T) {
 	w.AddObject(ball)
 
 	r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
-	xs := scene.Intersections{
+	xs := object.Intersections{
 		{T: math.Sqrt(2), Obj: floor},
 	}
 
@@ -327,7 +327,7 @@ func TestShadeHitWithAReflectiveTransparentMaterial(t *testing.T) {
 	w.AddObject(ball)
 
 	r := ray.NewRayAt(ray.NewPoint(0, 0, -3), ray.NewVec(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
-	xs := scene.Intersections{
+	xs := object.Intersections{
 		{T: math.Sqrt(2), Obj: floor},
 	}
 
@@ -344,7 +344,7 @@ func TestShadeHitWithAnIntersectionInShadow(t *testing.T) {
 	s2.SetTransform(ray.Translation(0, 0, 10))
 	w.AddObjects(s1, s2)
 	r := ray.NewRayAt(ray.NewPoint(0, 0, 5), ray.NewVec(0, 0, 1))
-	i := scene.Intersection{T: 4, Obj: s2}
+	i := object.Intersection{T: 4, Obj: s2}
 	comps := scene.PrepareComputations(i, r)
 	c := scene.ShadeHit(w, comps, 1)
 	assertColorEqual(t, object.NewColor(0.1, 0.1, 0.1), c)
@@ -422,45 +422,43 @@ func TestWorld_ColorAt(t *testing.T) {
 func TestHit(t *testing.T) {
 	testCases := []struct {
 		name      string
-		hitPoints scene.Intersections
-		expected  scene.Intersection
+		hitPoints object.Intersections
+		expected  object.Intersection
 	}{
 		{
 			name: "All positive",
-			hitPoints: scene.Intersections{{
+			hitPoints: object.Intersections{{
 				T: 1,
 			}, {
 				T: 2,
 			}, {
 				T: 3,
 			}},
-			expected: scene.Intersection{T: 1},
+			expected: object.Intersection{T: 1},
 		},
 		{
 			name: "Some negative and positive",
-			hitPoints: scene.Intersections{{
+			hitPoints: object.Intersections{{
 				T: -1,
 			}, {
 				T: 1,
 			},
 			},
-			expected: scene.Intersection{T: 1},
+			expected: object.Intersection{T: 1},
 		},
 		{
 			name: "All negative",
-			hitPoints: scene.Intersections{{
-				T: -2,
-			}, {
-				T: -1,
+			hitPoints: object.Intersections{
+				{T: -2},
+				{T: -1},
 			},
-			},
-			expected: scene.Intersection{},
+			expected: object.Intersection{},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := scene.Hit(testCase.hitPoints)
+			actual := object.Hit(testCase.hitPoints)
 			assert.Equal(t, testCase.expected, actual)
 		})
 	}

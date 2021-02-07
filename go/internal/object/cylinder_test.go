@@ -69,8 +69,8 @@ func TestCylinder_LocalIntersect(t *testing.T) {
 				return
 			}
 			require.Len(t, xs, 2)
-			assert.Equal(t, tt.t1, xs[0], "t1")
-			assert.Equal(t, tt.t2, xs[1], "t2")
+			assertIntersection(t, tt.t1, c, xs[0], "t1")
+			assertIntersection(t, tt.t2, c, xs[1], "t2")
 		})
 	}
 

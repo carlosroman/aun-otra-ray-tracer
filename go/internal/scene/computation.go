@@ -78,7 +78,7 @@ func contains(objs []object.Object, obj object.Object) (found bool, idx int) {
 	return false, 0
 }
 
-func PrepareComputations(i Intersection, r ray.Ray, xs ...Intersection) (comps Computation) {
+func PrepareComputations(i object.Intersection, r ray.Ray, xs ...object.Intersection) (comps Computation) {
 
 	comps.t = i.T
 	comps.obj = i.Obj

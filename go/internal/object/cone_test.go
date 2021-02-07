@@ -94,9 +94,9 @@ func TestCone_LocalNormalAt(t *testing.T) {
 				return
 			}
 			require.Len(t, xs, tt.count)
-			assert.InDelta(t, tt.t0, xs[0], 0.00001, "t0 did not match")
+			assertIntersection(t, tt.t0, c, xs[0], "t0 did not match")
 			if tt.count > 1 {
-				assert.InDelta(t, tt.t1, xs[1], 0.00001, "t1 did not match")
+				assertIntersection(t, tt.t1, c, xs[1], "t1 did not match")
 			}
 		})
 	}

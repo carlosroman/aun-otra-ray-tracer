@@ -18,7 +18,7 @@ func checkCap(r ray.Ray, t float64) bool {
 	return (math.Pow(x, 2) + math.Pow(z, 2)) <= 1
 }
 
-func (c cylinder) LocalIntersect(r ray.Ray) (xs []float64) {
+func (c cylinder) LocalIntersect(r ray.Ray) (xs Intersections) {
 	a := 2 * (math.Pow(r.Direction().GetX(), 2) + math.Pow(r.Direction().GetZ(), 2))
 	if a < epsilon {
 		return c.intersectCaps(r, xs)
@@ -48,18 +48,24 @@ func (c cylinder) LocalIntersect(r ray.Ray) (xs []float64) {
 
 	y0 := r.Origin().GetY() + t0*r.Direction().GetY()
 	if (c.minimum < y0) && (y0 < c.maximum) {
-		xs = append(xs, t0)
+		xs = append(xs, Intersection{
+			T:   t0,
+			Obj: &c,
+		})
 	}
 	y1 := r.Origin().GetY() + t1*r.Direction().GetY()
 
 	if (c.minimum < y1) && (y1 < c.maximum) {
-		xs = append(xs, t1)
+		xs = append(xs, Intersection{
+			T:   t1,
+			Obj: &c,
+		})
 	}
 
 	return c.intersectCaps(r, xs)
 }
 
-func (c cylinder) intersectCaps(r ray.Ray, xs []float64) []float64 {
+func (c cylinder) intersectCaps(r ray.Ray, xs Intersections) Intersections {
 	if !c.closed || math.Abs(r.Direction().GetY()) <= epsilon {
 		return xs
 	}
@@ -67,13 +73,19 @@ func (c cylinder) intersectCaps(r ray.Ray, xs []float64) []float64 {
 	t0 := (c.minimum - r.Origin().GetY()) / r.Direction().GetY()
 
 	if checkCap(r, t0) {
-		xs = append(xs, t0)
+		xs = append(xs, Intersection{
+			T:   t0,
+			Obj: &c,
+		})
 	}
 
 	t1 := (c.maximum - r.Origin().GetY()) / r.Direction().GetY()
 
 	if checkCap(r, t1) {
-		xs = append(xs, t1)
+		xs = append(xs, Intersection{
+			T:   t1,
+			Obj: &c,
+		})
 	}
 
 	return xs

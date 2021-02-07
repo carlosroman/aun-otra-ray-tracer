@@ -1,6 +1,7 @@
 package object_test
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -53,7 +54,7 @@ func TestSphere_LocalIntersect(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.transform != nil {
-				tt.sphere.SetTransform(tt.transform)
+				require.NoError(t, tt.sphere.SetTransform(tt.transform))
 			}
 			intersects := tt.sphere.LocalIntersect(tt.ray)
 			if len(tt.expected) < 1 {
@@ -64,7 +65,7 @@ func TestSphere_LocalIntersect(t *testing.T) {
 			assert.NotEmpty(t, intersects)
 			require.Len(t, intersects, len(tt.expected))
 			for i := range tt.expected {
-				assert.Equal(t, tt.expected[i], intersects[i])
+				assertIntersection(t, tt.expected[i], tt.sphere, intersects[i], fmt.Sprintf("t%v", i))
 			}
 		})
 	}
@@ -111,7 +112,7 @@ func TestIntersect(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.transform != nil {
-				tt.sphere.SetTransform(tt.transform)
+				require.NoError(t, tt.sphere.SetTransform(tt.transform))
 			}
 			intersects := object.Intersect(tt.sphere, tt.ray)
 			if len(tt.expected) < 1 {
@@ -122,7 +123,7 @@ func TestIntersect(t *testing.T) {
 			assert.NotEmpty(t, intersects)
 			require.Len(t, intersects, len(tt.expected))
 			for i := range tt.expected {
-				assert.Equal(t, tt.expected[i], intersects[i])
+				assertIntersection(t, tt.expected[i], tt.sphere, intersects[i])
 			}
 		})
 	}
@@ -131,7 +132,7 @@ func TestIntersect(t *testing.T) {
 func TestSphere_Transform(t *testing.T) {
 	obj := object.DefaultSphere()
 	translation := ray.Translation(2, 3, 4)
-	obj.SetTransform(translation)
+	require.NoError(t, obj.SetTransform(translation))
 	assert.Equal(t, translation, obj.Transform())
 }
 
@@ -214,7 +215,7 @@ func TestSphere_LocalNormalAt(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.transform != nil {
-				tt.sphere.SetTransform(tt.transform)
+				require.NoError(t, tt.sphere.SetTransform(tt.transform))
 			}
 			actual := tt.sphere.LocalNormalAt(tt.point)
 			assertVec(t, tt.expected, actual)
@@ -255,7 +256,7 @@ func TestNormalAt(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.transform != nil {
-				tt.sphere.SetTransform(tt.transform)
+				require.NoError(t, tt.sphere.SetTransform(tt.transform))
 			}
 			actual := object.NormalAt(tt.sphere, tt.point)
 			assertVec(t, tt.expected, actual)

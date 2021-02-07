@@ -1,15 +1,17 @@
-package object
+package object_test
 
 import (
 	"testing"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
 func TestCube_LocalIntersect(t *testing.T) {
-	c := NewCube()
+	c := object.NewCube()
 	testCases := []struct {
 		name      string
 		origin    ray.Vector
@@ -113,14 +115,13 @@ func TestCube_LocalIntersect(t *testing.T) {
 				return
 			}
 			require.Len(t, xs, 2)
-			assert.Equal(t, tt.t1, xs[0])
-			assert.Equal(t, tt.t2, xs[1])
+			assertIntersection(t, tt.t1, c, xs[0], "t1")
+			assertIntersection(t, tt.t2, c, xs[1], "t2")
 		})
 	}
 }
-
 func TestCube_LocalNormalAt(t *testing.T) {
-	c := NewCube()
+	c := object.NewCube()
 	testCases := []struct {
 		name           string
 		point          ray.Vector

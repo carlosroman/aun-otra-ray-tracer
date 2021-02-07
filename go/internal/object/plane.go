@@ -14,13 +14,16 @@ type plane struct {
 	obj
 }
 
-func (p plane) LocalIntersect(ray ray.Ray) []float64 {
+func (p plane) LocalIntersect(ray ray.Ray) Intersections {
 	if math.Abs(ray.Direction().GetY()) < epsilon {
 		return nil
 	}
 
 	t := -ray.Origin().GetY() / ray.Direction().GetY()
-	return []float64{t}
+	return []Intersection{{
+		T:   t,
+		Obj: &p,
+	}}
 }
 
 func (p plane) LocalNormalAt(_ ray.Vector) ray.Vector {

@@ -26,13 +26,13 @@ func (s sphere) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
 	return worldPoint.Subtract(s.c)
 }
 
-func Intersect(obj Object, rr ray.Ray) []float64 {
+func Intersect(obj Object, rr ray.Ray) Intersections {
 	return obj.
 		LocalIntersect(
 			rr.Transform(obj.TransformInverse()))
 }
 
-func (s *sphere) LocalIntersect(r ray.Ray) []float64 {
+func (s *sphere) LocalIntersect(r ray.Ray) Intersections {
 	sphereToRay := r.Origin().Subtract(s.c)
 	a := ray.Dot(r.Direction(), r.Direction())
 	b := 2 * ray.Dot(r.Direction(), sphereToRay)
@@ -47,7 +47,10 @@ func (s *sphere) LocalIntersect(r ray.Ray) []float64 {
 	sqrtDisc := math.Sqrt(discriminant)
 	t1 := (nB - sqrtDisc) / f
 	t2 := (nB + sqrtDisc) / f
-	return []float64{t1, t2}
+	return []Intersection{
+		{T: t1, Obj: s},
+		{T: t2, Obj: s},
+	}
 }
 
 func NewSphere(center ray.Vector, radius float64) Object {

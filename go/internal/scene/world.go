@@ -47,8 +47,8 @@ func (w *world) AddLight(light object.PointLight) {
 
 func (w *world) ColorAt(r ray.Ray, remaining int) (color object.RGB) {
 	intersections := Intersect(w, r)
-	hit := Hit(intersections)
-	if hit == NoHit {
+	hit := object.Hit(intersections)
+	if hit == object.NoHit {
 		return color
 	}
 	return ShadeHit(
@@ -63,8 +63,8 @@ func (w *world) IsShadowed(point ray.Vector) bool {
 	direction := v.Normalize()
 	r := ray.NewRayAt(point, direction)
 	intersections := Intersect(w, r)
-	h := Hit(intersections)
-	if h != NoHit && h.T < distance {
+	h := object.Hit(intersections)
+	if h != object.NoHit && h.T < distance {
 		return true
 	}
 	return false
@@ -76,24 +76,10 @@ func NewWorld() World {
 	}
 }
 
-type Intersection struct {
-	T   float64       // Intersection value
-	Obj object.Object // Intersected object
-}
-
-type Intersections []Intersection
-
-func Intersect(w World, r ray.Ray) (intersections Intersections) {
+func Intersect(w World, r ray.Ray) (intersections object.Intersections) {
 	for i := range w.Objects() {
 		hits := object.Intersect(w.Objects()[i], r)
-		tmpHits := make(Intersections, len(hits))
-		for hit := range hits {
-			tmpHits[hit] = Intersection{
-				T:   hits[hit],
-				Obj: w.Objects()[i],
-			}
-		}
-		intersections = append(intersections, tmpHits...)
+		intersections = append(intersections, hits...)
 	}
 	sort.SliceStable(intersections, func(i, j int) bool {
 		return intersections[i].T < intersections[j].T
@@ -162,14 +148,3 @@ func RefractedColor(w World, comps Computation, remaining int) object.RGB {
 	return w.ColorAt(refractRay, remaining).
 		MultiplyBy(comps.obj.Material().Transparency)
 }
-
-func Hit(intersections Intersections) Intersection {
-	for i := range intersections {
-		if 0 <= intersections[i].T {
-			return intersections[i]
-		}
-	}
-	return NoHit
-}
-
-var NoHit = Intersection{}
