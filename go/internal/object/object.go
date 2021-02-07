@@ -31,6 +31,23 @@ type obj struct {
 	m    Material
 }
 
+func (o obj) LocalNormalAt(r ray.Vector) ray.Vector {
+	return r
+}
+
+func (o obj) LocalIntersect(r ray.Ray) []float64 {
+	return nil
+}
+
+func NewTestShape() Object {
+	s := obj{}
+	_ = s.SetTransform(ray.DefaultIdentityMatrix())
+	m := DefaultMaterial()
+	m.Ambient = 1
+	s.SetMaterial(m)
+	return &s
+}
+
 func (o obj) Transform() ray.Matrix {
 	return o.t
 }
