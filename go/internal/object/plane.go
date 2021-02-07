@@ -11,32 +11,7 @@ var (
 )
 
 type plane struct {
-	t    ray.Matrix
-	tInv ray.Matrix
-	m    Material
-}
-
-func (p plane) Transform() ray.Matrix {
-	return p.t
-}
-
-func (p *plane) SetTransform(t ray.Matrix) error {
-	p.t = t
-	inverse, err := t.Inverse()
-	p.tInv = inverse
-	return err
-}
-
-func (p plane) TransformInverse() ray.Matrix {
-	return p.tInv
-}
-
-func (p plane) Material() Material {
-	return p.m
-}
-
-func (p *plane) SetMaterial(m Material) {
-	p.m = m
+	obj
 }
 
 func (p plane) LocalIntersect(ray ray.Ray) []float64 {
@@ -53,9 +28,8 @@ func (p plane) LocalNormalAt(_ ray.Vector) ray.Vector {
 }
 
 func NewPlane() Object {
-	return &plane{
-		t:    ray.DefaultIdentityMatrix(),
-		tInv: ray.DefaultIdentityMatrix(),
-		m:    DefaultMaterial(),
-	}
+	p := plane{}
+	p.SetMaterial(DefaultMaterial())
+	_ = p.SetTransform(ray.DefaultIdentityMatrix())
+	return &p
 }
