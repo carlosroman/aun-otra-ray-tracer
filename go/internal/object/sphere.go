@@ -7,11 +7,9 @@ import (
 )
 
 type sphere struct {
-	c    ray.Vector
-	r    float64
-	t    ray.Matrix
-	tInv ray.Matrix
-	m    Material
+	obj
+	c ray.Vector
+	r float64
 }
 
 func NormalAt(obj Object, worldPoint ray.Vector) ray.Vector {
@@ -52,50 +50,23 @@ func (s *sphere) LocalIntersect(r ray.Ray) []float64 {
 	return []float64{t1, t2}
 }
 
-func (s sphere) Transform() ray.Matrix {
-	return s.t
-}
-
-func (s sphere) TransformInverse() ray.Matrix {
-	return s.tInv
-}
-
-func (s *sphere) SetTransform(t ray.Matrix) error {
-	s.t = t
-	inverse, err := t.Inverse()
-	s.tInv = inverse
-	return err
-}
-
-func (s sphere) Material() Material {
-	return s.m
-}
-
-func (s *sphere) SetMaterial(m Material) {
-	s.m = m
-}
-
 func NewSphere(center ray.Vector, radius float64) Object {
-	return &sphere{
-		c:    center,
-		r:    radius,
-		t:    ray.DefaultIdentityMatrix(),
-		tInv: ray.DefaultIdentityMatrixInverse(),
-		m:    DefaultMaterial(),
+	s := &sphere{
+		c: center,
+		r: radius,
 	}
+	_ = s.SetTransform(ray.DefaultIdentityMatrix())
+	s.SetMaterial(DefaultMaterial())
+	return s
 }
 
 func NewGlassSphere(center ray.Vector, radius float64) Object {
 	material := DefaultMaterial()
 	material.Transparency = 1.0
 	material.RefractiveIndex = 1.5
-	return &sphere{
-		c:    center,
-		r:    radius,
-		t:    ray.DefaultIdentityMatrix(),
-		tInv: ray.DefaultIdentityMatrixInverse(),
-		m:    material,
-	}
+	s := NewSphere(center, radius)
+	s.SetMaterial(material)
+	return s
 }
 
 func DefaultSphere() Object {
