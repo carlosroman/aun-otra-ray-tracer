@@ -15,7 +15,7 @@ func TestCylinder_LocalIntersect(t *testing.T) {
 		name      string
 		origin    ray.Vector
 		direction ray.Vector
-		t1, t2    float64
+		t0, t1    float64
 		miss      bool
 	}{
 		{
@@ -40,37 +40,38 @@ func TestCylinder_LocalIntersect(t *testing.T) {
 			name:      "A ray strikes a cylinder 1",
 			origin:    ray.NewPoint(1, 0, -5),
 			direction: ray.NewVec(0, 0, 1),
+			t0:        5,
 			t1:        5,
-			t2:        5,
 		},
 		{
 			name:      "A ray strikes a cylinder 2",
 			origin:    ray.NewPoint(0, 0, -5),
 			direction: ray.NewVec(0, 0, 1),
-			t1:        4,
-			t2:        6,
+			t0:        4,
+			t1:        6,
 		},
-		//{
-		//	name:      "A ray strikes a cylinder 3",
-		//	origin:    ray.NewPoint(0.5, 0, -5),
-		//	direction: ray.NewVec(0.1, 1, 1),
-		//	t1:        6.80798,
-		//	t2:        7.08872,
-		//},
+		{
+			name:      "A ray strikes a cylinder 3",
+			origin:    ray.NewPoint(0.5, 0, -5),
+			direction: ray.NewVec(0.1, 1, 1),
+			t0:        6.80798,
+			t1:        7.08872,
+		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			c := object.DefaultCylinder()
-			r := ray.NewRayAt(tt.origin, tt.direction)
+			direction := tt.direction.Normalize()
+			r := ray.NewRayAt(tt.origin, direction)
 			xs := c.LocalIntersect(r)
 			if tt.miss {
 				assert.Len(t, xs, 0)
 				return
 			}
 			require.Len(t, xs, 2)
-			assertIntersection(t, tt.t1, c, xs[0], "t1")
-			assertIntersection(t, tt.t2, c, xs[1], "t2")
+			assertIntersection(t, tt.t0, c, xs[0], "t1")
+			assertIntersection(t, tt.t1, c, xs[1], "t2")
 		})
 	}
 
