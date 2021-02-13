@@ -14,8 +14,7 @@ type Pattern struct {
 }
 
 func (p Pattern) AtObj(obj Object, worldPoint ray.Vector) RGB {
-	objInv := obj.TransformInverse()
-	objPoint := objInv.MultiplyByVector(worldPoint)
+	objPoint := obj.WorldToObject(worldPoint)
 	patternPoint := p.TransformInverse.MultiplyByVector(objPoint)
 	return p.At(patternPoint)
 }
