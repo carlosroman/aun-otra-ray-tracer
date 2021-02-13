@@ -158,6 +158,7 @@ func BenchmarkRender(b *testing.B) {
 	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
 	require.NoError(b, err)
 	b.ReportAllocs()
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		canvas = scene.Render(c, w)
 	}
@@ -171,8 +172,107 @@ func BenchmarkMultiThreadedRender(b *testing.B) {
 	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
 	require.NoError(b, err)
 	b.ReportAllocs()
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		canvas = scene.MultiThreadedRender(c, w, 10, 100)
 	}
 	benchImg = canvas
+}
+
+func BenchmarkRender_WithReflectiveSphere(b *testing.B) {
+	var canvas scene.Canvas
+	w, err := testWorldWithReflectiveSphere()
+	require.NoError(b, err)
+	c, err := testCamera()
+	require.NoError(b, err)
+
+	b.Run("MultiThreadedRender", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			canvas = scene.MultiThreadedRender(c, w, 10, 100)
+		}
+		benchImg = canvas
+	})
+
+	b.Run("Render", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			canvas = scene.Render(c, w)
+		}
+		benchImg = canvas
+	})
+}
+
+func testCamera() (camera scene.Camera, err error) {
+	camera, err = scene.NewBasicCamera(11, 11, math.Pi/3)
+	if err != nil {
+		return nil, err
+	}
+	err = camera.SetTransform(
+		ray.ViewTransform(
+			ray.NewPoint(0, 1.5, -5), ray.NewPoint(0, 1, 0), ray.NewVec(0, 1, 0)))
+	return camera, err
+}
+
+func testWorld() (world scene.World, err error) {
+	floor := object.NewPlane()
+	err = floor.SetTransform(ray.Scaling(10, 0.01, 10))
+	if err != nil {
+		return nil, err
+	}
+	floorM := floor.Material()
+	floorM.Color = object.NewColor(1, 0.9, 0.9)
+	floorM.Specular = 0
+	floorM.Pattern = object.NewCheckerPattern(object.White, object.Black)
+	err = floorM.Pattern.SetTransform(ray.Scaling(0.1, 0.01, 0.1))
+	if err != nil {
+		return nil, err
+	}
+	floor.SetMaterial(floorM)
+
+	leftWall := object.NewPlane()
+	err = leftWall.SetTransform(
+		ray.Translation(0, 0, 5).
+			Multiply(ray.Rotation(ray.Y, -math.Pi/4)).
+			Multiply(ray.Rotation(ray.X, math.Pi/2)).
+			Multiply(ray.Scaling(10, 0.01, 10)))
+	if err != nil {
+		return nil, err
+	}
+	leftWall.SetMaterial(floorM)
+
+	rightWall := object.NewPlane()
+	err = rightWall.SetTransform(
+		ray.Translation(0, 0, 5).
+			Multiply(ray.Rotation(ray.Y, math.Pi/4)).
+			Multiply(ray.Rotation(ray.X, math.Pi/2)).
+			Multiply(ray.Scaling(10, 0.01, 10)))
+	if err != nil {
+		return nil, err
+	}
+	rightWall.SetMaterial(floorM)
+
+	world = scene.NewWorld()
+	world.AddLight(object.NewPointLight(ray.NewPoint(-10, 10, -10), object.White))
+	world.AddObjects(floor, leftWall, rightWall)
+	return world, err
+}
+
+func testWorldWithReflectiveSphere() (world scene.World, err error) {
+	world, err = testWorld()
+
+	middle := object.DefaultSphere()
+	err = middle.SetTransform(ray.Translation(-0.5, 1, 0.5))
+	if err != nil {
+		return nil, err
+	}
+	middleM := middle.Material()
+	middleM.Color = object.NewColor(0.5, 0, 0.5)
+	middleM.Reflective = 1
+	middleM.Diffuse = 0.7
+	middleM.Specular = 0.3
+	middle.SetMaterial(middleM)
+
+	world.AddObjects(middle)
+	return world, nil
 }
