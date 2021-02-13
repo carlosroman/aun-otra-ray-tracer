@@ -13,13 +13,9 @@ type sphere struct {
 }
 
 func NormalAt(obj Object, worldPoint ray.Vector) ray.Vector {
-	localPoint := obj.TransformInverse().MultiplyByVector(worldPoint)
+	localPoint := obj.WorldToObject(worldPoint)
 	localNormal := obj.LocalNormalAt(localPoint)
-	return obj.TransformInverse().
-		Transpose().
-		MultiplyByVector(localNormal).
-		SetW(0).
-		Normalize()
+	return obj.NormalToWorld(localNormal)
 }
 
 func (s sphere) LocalNormalAt(worldPoint ray.Vector) ray.Vector {

@@ -263,6 +263,22 @@ func TestNormalAt(t *testing.T) {
 			assertVec(t, tt.expected, actual.Normalize())
 		})
 	}
+
+	t.Run("Finding the normal on a child object", func(t *testing.T) {
+		g1 := object.NewGroup()
+		require.NoError(t, g1.SetTransform(ray.Rotation(ray.Y, math.Pi/2)))
+
+		g2 := object.NewGroup()
+		require.NoError(t, g2.SetTransform(ray.Scaling(1, 2, 3)))
+		g1.AddChild(&g2)
+
+		s := object.DefaultSphere()
+		require.NoError(t, s.SetTransform(ray.Translation(5, 0, 0)))
+		g2.AddChild(s)
+
+		p := object.NormalAt(s, ray.NewPoint(1.7321, 1.1547, -5.5774))
+		assertVec(t, ray.NewVec(0.2857, 0.42854, -0.85716), p)
+	})
 }
 
 func assertVec(t *testing.T, expected, actual ray.Vector) {

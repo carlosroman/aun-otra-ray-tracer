@@ -21,6 +21,9 @@ type Object interface {
 
 	Parent() Object
 	SetParent(obj Object)
+
+	WorldToObject(worldPoint ray.Vector) (point ray.Vector)
+	NormalToWorld(normalVector ray.Vector) (vector ray.Vector)
 }
 
 type BasicObject struct {
@@ -81,4 +84,29 @@ func (o obj) Material() Material {
 
 func (o *obj) SetMaterial(m Material) {
 	o.m = m
+}
+
+func (o obj) WorldToObject(worldPoint ray.Vector) (point ray.Vector) {
+	if o.p != nil {
+		worldPoint = o.p.WorldToObject(worldPoint)
+	}
+
+	return o.
+		tInv.
+		MultiplyByVector(worldPoint)
+}
+
+func (o obj) NormalToWorld(normaVector ray.Vector) (resultVector ray.Vector) {
+	resultVector = o.
+		tInv.
+		Transpose().
+		MultiplyByVector(normaVector).
+		SetW(0).
+		Normalize()
+
+	if o.p != nil {
+		resultVector = o.p.
+			NormalToWorld(resultVector)
+	}
+	return resultVector
 }

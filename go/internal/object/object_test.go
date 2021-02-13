@@ -51,3 +51,35 @@ func assertIntersection(t *testing.T, expectedT float64, expectedObj object.Obje
 	assert.InDelta(t, expectedT, actual.T, 0.00001, msg)
 	assert.Equal(t, expectedObj, actual.Obj, msg)
 }
+
+func TestObj_WorldToObject(t *testing.T) {
+	g1 := object.NewGroup()
+	require.NoError(t, g1.SetTransform(ray.Rotation(ray.Y, math.Pi/2)))
+
+	g2 := object.NewGroup()
+	require.NoError(t, g2.SetTransform(ray.Scaling(2, 2, 2)))
+	g1.AddChild(&g2)
+
+	s := object.DefaultSphere()
+	require.NoError(t, s.SetTransform(ray.Translation(5, 0, 0)))
+	g2.AddChild(s)
+
+	p := s.WorldToObject(ray.NewPoint(-2, 0, -10))
+	assertVec(t, ray.NewPoint(0, 0, -1), p)
+}
+
+func TestObj_NormalToWorld(t *testing.T) {
+	g1 := object.NewGroup()
+	require.NoError(t, g1.SetTransform(ray.Rotation(ray.Y, math.Pi/2)))
+
+	g2 := object.NewGroup()
+	require.NoError(t, g2.SetTransform(ray.Scaling(1, 2, 3)))
+	g1.AddChild(&g2)
+
+	s := object.DefaultSphere()
+	require.NoError(t, s.SetTransform(ray.Translation(5, 0, 0)))
+	g2.AddChild(s)
+
+	p := s.NormalToWorld(ray.NewVec(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3))
+	assertVec(t, ray.NewVec(0.28571, 0.42857, -0.85714), p)
+}
