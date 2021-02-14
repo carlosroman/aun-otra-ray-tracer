@@ -20,6 +20,8 @@ TEST_TIMEOUT ?= 10m
 
 GO_TEST ?= test $(TEST_OPTIONS) $(TEST_FLAGS) $(SOURCE_FILES) -run $(TEST_PATTERN) -timeout=$(TEST_TIMEOUT)
 
+GO_BENCHMARK ?= test -bench=. ./internal/... -timeout=$(TEST_TIMEOUT)
+
 .PHONY: go-get
 go-get:
 	@printf '\n================================================================\n'
@@ -54,6 +56,17 @@ test: go-get
 
 .PHONY: docker/test
 docker/test:
+	@($(GO_DOCKER_CMD) make $(DOCKER_TARGET_CMD))
+
+.PHONY: benchmark
+benchmark:
+	@printf '\n================================================================\n'
+	@printf 'Target: benchmark'
+	@printf '\n================================================================\n'
+	$(GO_BIN) $(GO_BENCHMARK)
+
+.PHONY: docker/benchmark
+docker/benchmark:
 	@($(GO_DOCKER_CMD) make $(DOCKER_TARGET_CMD))
 
 .PHONY: test-only
