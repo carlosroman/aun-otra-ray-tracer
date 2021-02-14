@@ -151,83 +151,92 @@ func setupRenderTest(t *testing.T) (scene.World, scene.Camera) {
 
 var benchImg scene.Canvas
 
-func BenchmarkRender(b *testing.B) {
+func canvasRender(world scene.World, camera scene.Camera) func() scene.Canvas {
+	return func() scene.Canvas {
+		return scene.Render(camera, world)
+	}
+}
+
+func canvasMultiThreadedRender(world scene.World, camera scene.Camera) func() scene.Canvas {
+	return func() scene.Canvas {
+		return scene.MultiThreadedRender(camera, world, 10, 100)
+	}
+}
+
+func BenchmarkRender_default(b *testing.B) {
+	camera := testDefaultCamera(b)
+	testCases := []struct {
+		name   string
+		render func() scene.Canvas
+	}{
+		{
+			name:   "Render",
+			render: canvasRender(testDefaultWorld(b), camera),
+		},
+		{
+			name:   "MultiThreadedRender",
+			render: canvasMultiThreadedRender(testDefaultWorld(b), camera),
+		},
+	}
+	for _, tt := range testCases {
+		b.Run(tt.name, func(b *testing.B) {
+			benchmarkRender(b, tt.render)
+		})
+	}
+}
+
+func BenchmarkRender_reflective(b *testing.B) {
+	camera := testWorldCamera(b)
+	testCases := []struct {
+		name   string
+		render func() scene.Canvas
+	}{
+		{
+			name:   "Render",
+			render: canvasRender(testWorldWithReflectiveSphere(b), camera),
+		},
+		{
+			name:   "MultiThreadedRender",
+			render: canvasMultiThreadedRender(testWorldWithReflectiveSphere(b), camera),
+		},
+	}
+	for _, tt := range testCases {
+		b.Run(tt.name, func(b *testing.B) {
+			benchmarkRender(b, tt.render)
+		})
+	}
+}
+func benchmarkRender(b *testing.B, render func() scene.Canvas) {
 	var canvas scene.Canvas
-	w, err := scene.DefaultWorld()
-	require.NoError(b, err)
-	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
-	require.NoError(b, err)
 	b.ReportAllocs()
-	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		canvas = scene.Render(c, w)
+		canvas = render()
 	}
 	benchImg = canvas
 }
 
-func BenchmarkMultiThreadedRender(b *testing.B) {
-	var canvas scene.Canvas
-	w, err := scene.DefaultWorld()
-	require.NoError(b, err)
-	c, err := scene.NewBasicCamera(11, 11, math.Pi/2)
-	require.NoError(b, err)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		canvas = scene.MultiThreadedRender(c, w, 10, 100)
-	}
-	benchImg = canvas
-}
-
-func BenchmarkRender_WithReflectiveSphere(b *testing.B) {
-	var canvas scene.Canvas
-	w, err := testWorldWithReflectiveSphere()
-	require.NoError(b, err)
-	c, err := testCamera()
-	require.NoError(b, err)
-
-	b.Run("MultiThreadedRender", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			canvas = scene.MultiThreadedRender(c, w, 10, 100)
-		}
-		benchImg = canvas
-	})
-
-	b.Run("Render", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			canvas = scene.Render(c, w)
-		}
-		benchImg = canvas
-	})
-}
-
-func testCamera() (camera scene.Camera, err error) {
+func testWorldCamera(tb testing.TB) (camera scene.Camera) {
+	var err error
 	camera, err = scene.NewBasicCamera(11, 11, math.Pi/3)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(tb, err)
 	err = camera.SetTransform(
 		ray.ViewTransform(
 			ray.NewPoint(0, 1.5, -5), ray.NewPoint(0, 1, 0), ray.NewVec(0, 1, 0)))
-	return camera, err
+	return camera
 }
 
-func testWorld() (world scene.World, err error) {
+func testWorld(tb testing.TB) (world scene.World) {
 	floor := object.NewPlane()
-	err = floor.SetTransform(ray.Scaling(10, 0.01, 10))
-	if err != nil {
-		return nil, err
-	}
+	err := floor.SetTransform(ray.Scaling(10, 0.01, 10))
+	require.NoError(tb, err)
+
 	floorM := floor.Material()
 	floorM.Color = object.NewColor(1, 0.9, 0.9)
 	floorM.Specular = 0
 	floorM.Pattern = object.NewCheckerPattern(object.White, object.Black)
 	err = floorM.Pattern.SetTransform(ray.Scaling(0.1, 0.01, 0.1))
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(tb, err)
+
 	floor.SetMaterial(floorM)
 
 	leftWall := object.NewPlane()
@@ -236,9 +245,8 @@ func testWorld() (world scene.World, err error) {
 			Multiply(ray.Rotation(ray.Y, -math.Pi/4)).
 			Multiply(ray.Rotation(ray.X, math.Pi/2)).
 			Multiply(ray.Scaling(10, 0.01, 10)))
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(tb, err)
+
 	leftWall.SetMaterial(floorM)
 
 	rightWall := object.NewPlane()
@@ -247,25 +255,22 @@ func testWorld() (world scene.World, err error) {
 			Multiply(ray.Rotation(ray.Y, math.Pi/4)).
 			Multiply(ray.Rotation(ray.X, math.Pi/2)).
 			Multiply(ray.Scaling(10, 0.01, 10)))
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(tb, err)
+
 	rightWall.SetMaterial(floorM)
 
 	world = scene.NewWorld()
 	world.AddLight(object.NewPointLight(ray.NewPoint(-10, 10, -10), object.White))
 	world.AddObjects(floor, leftWall, rightWall)
-	return world, err
+	return world
 }
 
-func testWorldWithReflectiveSphere() (world scene.World, err error) {
-	world, err = testWorld()
-
+func testWorldWithReflectiveSphere(tb testing.TB) (world scene.World) {
+	world = testWorld(tb)
 	middle := object.DefaultSphere()
-	err = middle.SetTransform(ray.Translation(-0.5, 1, 0.5))
-	if err != nil {
-		return nil, err
-	}
+	err := middle.SetTransform(ray.Translation(-0.5, 1, 0.5))
+	require.NoError(tb, err)
+
 	middleM := middle.Material()
 	middleM.Color = object.NewColor(0.5, 0, 0.5)
 	middleM.Reflective = 1
@@ -274,5 +279,19 @@ func testWorldWithReflectiveSphere() (world scene.World, err error) {
 	middle.SetMaterial(middleM)
 
 	world.AddObjects(middle)
-	return world, nil
+	return world
+}
+
+func testDefaultCamera(tb testing.TB) (camera scene.Camera) {
+	var err error
+	camera, err = scene.NewBasicCamera(11, 11, math.Pi/2)
+	require.NoError(tb, err)
+	return camera
+}
+
+func testDefaultWorld(tb testing.TB) (world scene.World) {
+	var err error
+	world, err = scene.DefaultWorld()
+	require.NoError(tb, err)
+	return world
 }
