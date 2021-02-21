@@ -59,11 +59,11 @@ func NewSphere(center ray.Vector, radius float64) Object {
 	return s
 }
 
-func NewGlassSphere(center ray.Vector, radius float64) Object {
+func NewGlassSphere(center ray.Vector, radius float64) (s Object) {
 	material := DefaultMaterial()
 	material.Transparency = 1.0
 	material.RefractiveIndex = 1.5
-	s := NewSphere(center, radius)
+	s = NewSphere(center, radius)
 	s.SetMaterial(material)
 	return s
 }
@@ -74,4 +74,20 @@ func DefaultSphere() Object {
 
 func DefaultGlassSphere() Object {
 	return NewGlassSphere(ray.NewPoint(0, 0, 0), 1)
+}
+
+func NewMetalSphere(center ray.Vector, radius float64) (s Object) {
+	material := DefaultMaterial()
+	material.Diffuse = 0.6
+	material.Reflective = 0.1
+	material.Specular = 0.4
+	material.Shininess = 10
+	material.Color = NewColor(0.9, 1, 0.9)
+	s = NewSphere(center, radius)
+	s.SetMaterial(material)
+	return s
+}
+
+func DefaultMetalSphere() Object {
+	return NewMetalSphere(ray.NewPoint(0, 0, 0), 1)
 }
