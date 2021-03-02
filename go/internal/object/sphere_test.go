@@ -282,6 +282,7 @@ func TestNormalAt(t *testing.T) {
 }
 
 func assertVec(t *testing.T, expected, actual ray.Vector) {
+	require.NotNil(t, actual)
 	assert.InDelta(t, expected.GetX(), actual.GetX(), 0.00001, "X did not match")
 	assert.InDelta(t, expected.GetY(), actual.GetY(), 0.00001, "Y did not match")
 	assert.InDelta(t, expected.GetZ(), actual.GetZ(), 0.00001, "Z did not match")
