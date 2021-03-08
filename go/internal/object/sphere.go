@@ -49,22 +49,28 @@ func (s *sphere) LocalIntersect(r ray.Ray) Intersections {
 	}
 }
 
-func NewSphere(center ray.Vector, radius float64) Object {
+func NewSphere(center ray.Vector, radius float64, opts ...Option) Object {
 	s := &sphere{
 		c: center,
 		r: radius,
 	}
 	_ = s.SetTransform(ray.DefaultIdentityMatrix())
 	s.SetMaterial(DefaultMaterial())
+
+	for i := range opts {
+		opts[i].Apply(s)
+	}
 	return s
 }
 
-func NewGlassSphere(center ray.Vector, radius float64) (s Object) {
+func NewGlassSphere(center ray.Vector, radius float64, opts ...Option) (s Object) {
 	material := DefaultMaterial()
 	material.Transparency = 1.0
 	material.RefractiveIndex = 1.5
-	s = NewSphere(center, radius)
-	s.SetMaterial(material)
+	opts = append(opts, WithMaterial(material))
+	s = NewSphere(center, radius,
+		opts...,
+	)
 	return s
 }
 
@@ -76,15 +82,17 @@ func DefaultGlassSphere() Object {
 	return NewGlassSphere(ray.NewPoint(0, 0, 0), 1)
 }
 
-func NewMetalSphere(center ray.Vector, radius float64) (s Object) {
+func NewMetalSphere(center ray.Vector, radius float64, opts ...Option) (s Object) {
 	material := DefaultMaterial()
 	material.Diffuse = 0.6
 	material.Reflective = 0.1
 	material.Specular = 0.4
 	material.Shininess = 10
 	material.Color = NewColor(0.9, 1, 0.9)
-	s = NewSphere(center, radius)
-	s.SetMaterial(material)
+	opts = append(opts, WithMaterial(material))
+	s = NewSphere(center, radius,
+		opts...,
+	)
 	return s
 }
 
