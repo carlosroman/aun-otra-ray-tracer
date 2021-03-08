@@ -20,8 +20,8 @@ func TestWithMaterial(t *testing.T) {
 
 func TestWithTransform(t *testing.T) {
 	obj := object.NewTestShape()
-	expectedTransformatuin := ray.Rotation(ray.Y, math.Pi/2)
-	opt := object.WithTransform(expectedTransformatuin)
+	expectedTransformation := ray.Rotation(ray.Y, math.Pi/2)
+	opt := object.WithTransform(expectedTransformation)
 	opt.Apply(obj)
-	assert.Equal(t, expectedTransformatuin, obj.Transform())
+	assert.Equal(t, expectedTransformation, obj.Transform())
 }
