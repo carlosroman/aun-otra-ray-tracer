@@ -70,7 +70,7 @@ func TestCamera_RayForPixel(t *testing.T) {
 			}
 			pixel := c.RayForPixel(tt.nx, tt.ny)
 			require.NotNil(t, pixel)
-			assert.Equal(t, tt.origin, pixel.Origin())
+			assertVectorEqual(t, tt.origin, pixel.Origin())
 			assertVectorEqual(t, tt.direction, pixel.Direction())
 		})
 	}
@@ -109,7 +109,7 @@ func TestCamera_PixelSize(t *testing.T) {
 			c, err := scene.NewBasicCamera(tt.hSize, tt.vSize, math.Pi/2)
 			require.NoError(t, err)
 			actual := c.PixelSize()
-			assert.Equal(t, tt.expected, actual)
+			assert.InDelta(t, tt.expected, actual, 0.0001)
 		})
 	}
 }
