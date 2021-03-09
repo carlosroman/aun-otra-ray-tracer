@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	utahTeapot    = path.Join("..", "..", "..", "test", "models", "utah-teapot.obj")
-	utahTeapotVerts = 3200
-	utahTeapotLow = path.Join("..", "..", "..", "test", "models", "utah-teapot-low.obj")
+	utahTeapot         = path.Join("..", "..", "..", "test", "models", "utah-teapot.obj")
+	utahTeapotVerts    = 3200
+	utahTeapotLow      = path.Join("..", "..", "..", "test", "models", "utah-teapot-low.obj")
 	utahTeapotLowVerts = 128
 )
 
