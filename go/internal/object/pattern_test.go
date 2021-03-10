@@ -4,10 +4,11 @@ import (
 	"math"
 	"testing"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
 )
 
 func TestStripePattern_At(t *testing.T) {

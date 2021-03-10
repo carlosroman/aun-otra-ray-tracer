@@ -217,7 +217,7 @@ func TestSphere_LocalNormalAt(t *testing.T) {
 			if tt.transform != nil {
 				require.NoError(t, tt.sphere.SetTransform(tt.transform))
 			}
-			actual := tt.sphere.LocalNormalAt(tt.point)
+			actual := tt.sphere.LocalNormalAt(tt.point, object.NoHit)
 			assertVec(t, tt.expected, actual)
 		})
 	}

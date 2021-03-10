@@ -50,7 +50,7 @@ func TestTriangle_LocalNormalAt(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := tr.LocalNormalAt(tt.point)
+			actual := tr.LocalNormalAt(tt.point, object.NoHit)
 			assertVec(t, tt.expectedNormal, actual)
 		})
 	}

@@ -1,8 +1,9 @@
 package object
 
 type Intersection struct {
-	T   float64 // Intersection value
-	Obj Object  // Intersected object
+	T    float64 // Intersection value
+	Obj  Object  // Intersected object
+	U, V float64 // UV value between 0 - 1
 }
 
 type Intersections []Intersection

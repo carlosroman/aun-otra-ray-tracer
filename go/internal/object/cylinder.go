@@ -91,7 +91,7 @@ func (c cylinder) intersectCaps(r ray.Ray, xs Intersections) Intersections {
 	return xs
 }
 
-func (c cylinder) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
+func (c cylinder) LocalNormalAt(worldPoint ray.Vector, hit Intersection) ray.Vector {
 
 	dist := math.Pow(worldPoint.GetX(), 2) + math.Pow(worldPoint.GetZ(), 2)
 

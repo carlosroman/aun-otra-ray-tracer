@@ -37,7 +37,7 @@ func TestCone_LocalIntersect(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			shape := object.DefaultCone()
-			assert.Equal(t, tt.expectedNormal, shape.LocalNormalAt(tt.point))
+			assert.Equal(t, tt.expectedNormal, shape.LocalNormalAt(tt.point, object.NoHit))
 		})
 	}
 }

@@ -33,7 +33,7 @@ func (t triangle) String() string {
 	return fmt.Sprintf("e1: %v, e2: %v, normal: %v", t.e1, t.e2, t.normal)
 }
 
-func (t triangle) LocalNormalAt(_ ray.Vector) ray.Vector {
+func (t triangle) LocalNormalAt(_ ray.Vector, _ Intersection) ray.Vector {
 	return t.normal
 }
 

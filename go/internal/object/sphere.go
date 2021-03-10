@@ -12,7 +12,7 @@ type sphere struct {
 	r float64
 }
 
-func (s sphere) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
+func (s sphere) LocalNormalAt(worldPoint ray.Vector, _ Intersection) ray.Vector {
 	return worldPoint.Subtract(s.c)
 }
 

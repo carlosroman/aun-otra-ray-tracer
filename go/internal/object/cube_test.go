@@ -170,7 +170,7 @@ func TestCube_LocalNormalAt(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expectedNormal, c.LocalNormalAt(tt.point))
+			assert.Equal(t, tt.expectedNormal, c.LocalNormalAt(tt.point, object.NoHit))
 		})
 	}
 }

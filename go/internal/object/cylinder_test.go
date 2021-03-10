@@ -239,7 +239,7 @@ func TestCylinder_LocalNormalAt(t *testing.T) {
 			} else {
 				c = object.DefaultCylinder()
 			}
-			assert.Equal(t, tt.expectedNormal, c.LocalNormalAt(tt.point))
+			assert.Equal(t, tt.expectedNormal, c.LocalNormalAt(tt.point, object.NoHit))
 		})
 	}
 }

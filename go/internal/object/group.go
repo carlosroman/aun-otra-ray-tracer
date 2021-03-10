@@ -24,8 +24,8 @@ func NewGroup() Group {
 	return g
 }
 
-func (g Group) LocalNormalAt(r ray.Vector) ray.Vector {
-	return r
+func (g Group) LocalNormalAt(worldPoint ray.Vector, _ Intersection) ray.Vector {
+	return worldPoint
 }
 
 func (g Group) LocalIntersect(r ray.Ray) (xs Intersections) {

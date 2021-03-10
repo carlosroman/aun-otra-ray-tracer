@@ -37,7 +37,7 @@ func checkAxis(origin, direction float64) (tmin, tmax float64) {
 	return tmin, tmax
 }
 
-func (c cube) LocalNormalAt(point ray.Vector) ray.Vector {
+func (c cube) LocalNormalAt(point ray.Vector, _ Intersection) ray.Vector {
 	absX := math.Abs(point.GetX())
 	absY := math.Abs(point.GetY())
 	maxc := math.Max(math.Max(absX, absY),

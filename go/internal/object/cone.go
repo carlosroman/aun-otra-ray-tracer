@@ -99,7 +99,7 @@ func (c cone) intersectCaps(r ray.Ray, xs Intersections) Intersections {
 	return xs
 }
 
-func (c cone) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
+func (c cone) LocalNormalAt(worldPoint ray.Vector, hit Intersection) ray.Vector {
 
 	dist := math.Pow(worldPoint.GetX(), 2) + math.Pow(worldPoint.GetZ(), 2)
 

@@ -17,9 +17,9 @@ func TestNewPlane(t *testing.T) {
 
 func TestPlane_LocalNormalAt(t *testing.T) {
 	plane := object.NewPlane()
-	n1 := plane.LocalNormalAt(ray.NewPoint(0, 0, 0))
-	n2 := plane.LocalNormalAt(ray.NewPoint(10, 0, -10))
-	n3 := plane.LocalNormalAt(ray.NewPoint(-5, 0, 150))
+	n1 := plane.LocalNormalAt(ray.NewPoint(0, 0, 0), object.NoHit)
+	n2 := plane.LocalNormalAt(ray.NewPoint(10, 0, -10), object.NoHit)
+	n3 := plane.LocalNormalAt(ray.NewPoint(-5, 0, 150), object.NoHit)
 
 	assertVec(t, ray.NewVec(0, 1, 0), n1)
 	assertVec(t, ray.NewVec(0, 1, 0), n2)

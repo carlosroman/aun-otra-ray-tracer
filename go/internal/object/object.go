@@ -10,7 +10,7 @@ const (
 
 type Object interface {
 	LocalIntersect(ray ray.Ray) Intersections
-	LocalNormalAt(worldPoint ray.Vector) ray.Vector
+	LocalNormalAt(worldPoint ray.Vector, hit Intersection) ray.Vector
 
 	Transform() ray.Matrix
 	TransformInverse() ray.Matrix
@@ -28,7 +28,7 @@ type Object interface {
 
 func NormalAt(xs Intersection, worldPoint ray.Vector) ray.Vector {
 	localPoint := xs.Obj.WorldToObject(worldPoint)
-	localNormal := xs.Obj.LocalNormalAt(localPoint)
+	localNormal := xs.Obj.LocalNormalAt(localPoint, xs)
 	return xs.Obj.NormalToWorld(localNormal)
 }
 
@@ -50,8 +50,8 @@ type obj struct {
 	p    Object
 }
 
-func (o obj) LocalNormalAt(r ray.Vector) ray.Vector {
-	return r
+func (o obj) LocalNormalAt(worldPoint ray.Vector, _ Intersection) ray.Vector {
+	return worldPoint
 }
 
 func (o obj) LocalIntersect(r ray.Ray) Intersections {

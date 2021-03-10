@@ -26,7 +26,7 @@ func (p plane) LocalIntersect(ray ray.Ray) Intersections {
 	}}
 }
 
-func (p plane) LocalNormalAt(_ ray.Vector) ray.Vector {
+func (p plane) LocalNormalAt(worldPoint ray.Vector, hit Intersection) ray.Vector {
 	return defaultPlaneLocalNormal
 }
 
