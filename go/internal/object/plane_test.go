@@ -10,9 +10,34 @@ import (
 )
 
 func TestNewPlane(t *testing.T) {
-	plane := object.NewPlane()
-	assert.Equal(t, ray.DefaultIdentityMatrix(), plane.Transform())
-	assert.Equal(t, object.DefaultMaterial(), plane.Material())
+	tmpMaterial := object.DefaultMaterial()
+	tmpMaterial.Ambient = 2
+
+	testCases := []struct {
+		name                   string
+		expectedIdentityMatrix ray.Matrix
+		expectedMaterial       object.Material
+		opts                   []object.Option
+	}{
+		{
+			name:                   "Default",
+			expectedIdentityMatrix: ray.DefaultIdentityMatrix(),
+			expectedMaterial:       object.DefaultMaterial(),
+		},
+		{
+			name:                   "Opts",
+			expectedIdentityMatrix: ray.DefaultIdentityMatrix(),
+			expectedMaterial:       tmpMaterial,
+			opts:                   []object.Option{object.WithMaterial(tmpMaterial)},
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			plane := object.NewPlane(tt.opts...)
+			assert.Equal(t, tt.expectedIdentityMatrix, plane.Transform())
+			assert.Equal(t, tt.expectedMaterial, plane.Material())
+		})
+	}
 }
 
 func TestPlane_LocalNormalAt(t *testing.T) {

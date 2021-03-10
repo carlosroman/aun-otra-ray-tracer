@@ -26,13 +26,16 @@ func (p plane) LocalIntersect(ray ray.Ray) Intersections {
 	}}
 }
 
-func (p plane) LocalNormalAt(worldPoint ray.Vector, hit Intersection) ray.Vector {
+func (p plane) LocalNormalAt(_ ray.Vector, _ Intersection) ray.Vector {
 	return defaultPlaneLocalNormal
 }
 
-func NewPlane() Object {
-	p := plane{}
+func NewPlane(opts ...Option) Object {
+	p := &plane{}
 	p.SetMaterial(DefaultMaterial())
 	_ = p.SetTransform(ray.DefaultIdentityMatrix())
-	return &p
+	for i := range opts {
+		opts[i].Apply(p)
+	}
+	return p
 }
