@@ -13,38 +13,37 @@ import (
 )
 
 type WavefrontObj struct {
-	Vertices []ray.Vector
-	Group    Group
+	Vertices,
+	Normals []ray.Vector
+	Group Group
 }
 
 func (w *WavefrontObj) Object() Object {
 	return &w.Group
 }
 
-var pointsReg = regexp.MustCompile("(?P<Point>\\d+)(\\/(?P<Texture>\\d{*})\\/(?P<Normal>\\d+))?")
+var pointsReg = regexp.MustCompile("(?P<Point>\\d+)(/(?P<Texture>\\d{*})/(?P<Normal>\\d+))?")
 
 func NewWavefrontObj(reader io.Reader) (wv WavefrontObj, err error) {
-	var vertices []ray.Vector
+	var vertices, normals []ray.Vector
 	defaultGroup := NewGroup()
 	scanner := bufio.NewScanner(reader)
 	re := regexp.MustCompile("\\s+")
 	for scanner.Scan() {
 		text := scanner.Text()
 		if strings.HasPrefix(text, "v ") {
-			points := re.Split(text, 4)
-			x, err := strconv.ParseFloat(points[1], 64)
+			point, err := parsePoint(re, text)
 			if err != nil {
 				return wv, err
 			}
-			y, err := strconv.ParseFloat(points[2], 64)
+			vertices = append(vertices, point)
+		}
+		if strings.HasPrefix(text, "vn ") {
+			point, err := parsePoint(re, text)
 			if err != nil {
 				return wv, err
 			}
-			z, err := strconv.ParseFloat(points[3], 64)
-			if err != nil {
-				return wv, err
-			}
-			vertices = append(vertices, ray.NewPoint(x, y, z))
+			normals = append(normals, point)
 		}
 		if strings.HasPrefix(text, "g ") {
 			if vertices == nil {
@@ -61,11 +60,11 @@ func NewWavefrontObj(reader io.Reader) (wv WavefrontObj, err error) {
 			var groupsToAdd []Object
 			switch len(points) {
 			case 4:
-				groupsToAdd, err = createTriangle(points, vertices)
+				groupsToAdd, err = createTriangle(points, vertices, normals)
 			case 5:
-				groupsToAdd, err = createTrianglesFromSquare(points, vertices)
+				groupsToAdd, err = createTrianglesFromSquare(points, vertices, normals)
 			case 6:
-				groupsToAdd, err = createTrianglesFromPentagon(points, vertices)
+				groupsToAdd, err = createTrianglesFromPentagon(points, vertices, normals)
 			default:
 				return WavefrontObj{}, errors.New(fmt.Sprintf("do not know how to handle polygon with %v points", len(points)-1))
 			}
@@ -88,31 +87,62 @@ func NewWavefrontObj(reader io.Reader) (wv WavefrontObj, err error) {
 		return wv, err
 	}
 	wv.Vertices = vertices
+	wv.Normals = normals
 	wv.Group = defaultGroup
 	return wv, nil
 }
 
-func createTrianglesFromSquare(points []string, vertices []ray.Vector) ([]Object, error) {
+func parsePoint(re *regexp.Regexp, text string) (ray.Vector, error) {
+	points := re.Split(text, 4)
+	x, err := strconv.ParseFloat(points[1], 64)
+	if err != nil {
+		return nil, err
+	}
+	y, err := strconv.ParseFloat(points[2], 64)
+	if err != nil {
+		return nil, err
+	}
+	z, err := strconv.ParseFloat(points[3], 64)
+	if err != nil {
+		return nil, err
+	}
+	point := ray.NewPoint(x, y, z)
+	return point, nil
+}
+
+func createTrianglesFromSquare(points []string, vertices, normals []ray.Vector) ([]Object, error) {
 	objs := make([]Object, 2)
-	p1, _, _, err := parseFaceElement(points[1])
+	p1, _, p1n, err := parseFaceElement(points[1])
 	if err != nil {
 		return nil, err
 	}
 
 	for i := 2; i < len(points)-1; i++ {
-		p2, _, _, err := parseFaceElement(points[i])
+		p2, _, p2n, err := parseFaceElement(points[i])
 		if err != nil {
 			return nil, err
 		}
-		p3, _, _, err := parseFaceElement(points[i+1])
+		p3, _, p3n, err := parseFaceElement(points[i+1])
 		if err != nil {
 			return nil, err
 		}
-		objs[i-2] = NewTriangle(
-			vertices[p1-1],
-			vertices[p2-1],
-			vertices[p3-1],
-		)
+
+		if len(normals) > 0 && p1n >= 0 && p2n >= 0 && p3n >= 0 {
+			objs[i-2] = NewSmoothTriangle(
+				vertices[p1-1],
+				vertices[p2-1],
+				vertices[p3-1],
+				normals[p1n-1],
+				normals[p2n-1],
+				normals[p3n-1],
+			)
+		} else {
+			objs[i-2] = NewTriangle(
+				vertices[p1-1],
+				vertices[p2-1],
+				vertices[p3-1],
+			)
+		}
 	}
 	return objs, nil
 }
@@ -135,43 +165,66 @@ func parseFaceElement(face string) (v, vt, vn int, err error) {
 	return
 }
 
-func createTrianglesFromPentagon(points []string, vertices []ray.Vector) ([]Object, error) {
+func createTrianglesFromPentagon(points []string, vertices, normals []ray.Vector) ([]Object, error) {
 	objs := make([]Object, 3)
-	p1, _, _, err := parseFaceElement(points[1])
+	p1, _, p1n, err := parseFaceElement(points[1])
 	if err != nil {
 		return nil, err
 	}
 
 	for i := 2; i < len(points)-1; i++ {
-		p2, _, _, err := parseFaceElement(points[i])
+		p2, _, p2n, err := parseFaceElement(points[i])
 		if err != nil {
 			return nil, err
 		}
-		p3, _, _, err := parseFaceElement(points[i+1])
+		p3, _, p3n, err := parseFaceElement(points[i+1])
 		if err != nil {
 			return nil, err
 		}
-		objs[i-2] = NewTriangle(
-			vertices[p1-1],
-			vertices[p2-1],
-			vertices[p3-1],
-		)
+
+		if len(normals) > 0 && p1n >= 0 && p2n >= 0 && p3n >= 0 {
+			objs[i-2] = NewSmoothTriangle(
+				vertices[p1-1],
+				vertices[p2-1],
+				vertices[p3-1],
+				normals[p1n-1],
+				normals[p2n-1],
+				normals[p3n-1],
+			)
+		} else {
+			objs[i-2] = NewTriangle(
+				vertices[p1-1],
+				vertices[p2-1],
+				vertices[p3-1],
+			)
+		}
 	}
 	return objs, nil
 }
 
-func createTriangle(points []string, vertices []ray.Vector) ([]Object, error) {
-	p1, _, _, err := parseFaceElement(points[1])
+func createTriangle(points []string, vertices, normals []ray.Vector) ([]Object, error) {
+	p1, _, p1n, err := parseFaceElement(points[1])
 	if err != nil {
 		return nil, err
 	}
-	p2, _, _, err := parseFaceElement(points[2])
+	p2, _, p2n, err := parseFaceElement(points[2])
 	if err != nil {
 		return nil, err
 	}
-	p3, _, _, err := parseFaceElement(points[3])
+	p3, _, p3n, err := parseFaceElement(points[3])
 	if err != nil {
 		return nil, err
+	}
+
+	if len(normals) > 0 && p1n >= 0 && p2n >= 0 && p3n >= 0 {
+		return []Object{NewSmoothTriangle(
+			vertices[p1-1],
+			vertices[p2-1],
+			vertices[p3-1],
+			normals[p1n-1],
+			normals[p2n-1],
+			normals[p3n-1],
+		)}, nil
 	}
 
 	return []Object{NewTriangle(

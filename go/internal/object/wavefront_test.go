@@ -143,6 +143,36 @@ f 1 2 3 4 5
 `,
 		},
 		{
+			name: "Faces with normals",
+			assertFunc: func(t *testing.T, obj object.WavefrontObj) {
+				require.Len(t, obj.Group.Children, 2)
+				require.Len(t, obj.Normals, 3)
+
+				t1 := object.NewSmoothTriangle(obj.Vertices[1-1], obj.Vertices[2-1], obj.Vertices[3-1],
+					obj.Normals[3-1], obj.Normals[1-1], obj.Normals[2-1],
+				)
+				t1.SetParent(&obj.Group)
+				assert.Equal(t, t1, obj.Group.Children[0])
+				t2 := object.NewSmoothTriangle(obj.Vertices[3-1], obj.Vertices[2-1], obj.Vertices[1-1],
+					obj.Normals[2-1], obj.Normals[1-1], obj.Normals[3-1],
+				)
+				t2.SetParent(&obj.Group)
+				assert.Equal(t, t2, obj.Group.Children[1])
+
+			},
+			fileContent: `v 0 1 0
+v -1 0 0
+v 1 0 0
+
+vn -1 0 0
+vn 1 0 0
+vn 0 1 0
+
+f 1//3 2//1 3//2
+f 3/0/2 2/102/1 1/14/3
+`,
+		},
+		{
 			name: "Triangles in groups",
 			assertFunc: func(t *testing.T, obj object.WavefrontObj) {
 				require.Len(t, obj.Group.Children, 2)
