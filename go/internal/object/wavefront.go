@@ -24,9 +24,9 @@ func (w *WavefrontObj) Object() Object {
 
 var pointsReg = regexp.MustCompile("(?P<Point>\\d+)(/(?P<Texture>\\d{*})/(?P<Normal>\\d+))?")
 
-func NewWavefrontObj(reader io.Reader) (wv WavefrontObj, err error) {
+func NewWavefrontObj(reader io.Reader, opts ...Option) (wv WavefrontObj, err error) {
 	var vertices, normals []ray.Vector
-	defaultGroup := NewGroup()
+	defaultGroup := NewGroup(opts...)
 	scanner := bufio.NewScanner(reader)
 	re := regexp.MustCompile("\\s+")
 	for scanner.Scan() {
