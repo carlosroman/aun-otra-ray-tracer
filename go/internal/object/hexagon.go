@@ -30,8 +30,8 @@ func hexagonSide() (side Object) {
 	return &s
 }
 
-func NewHexagon() (hex Object) {
-	h := NewGroup()
+func NewHexagon(opts ...Option) (hex Object) {
+	h := NewGroup(opts...)
 
 	for i := float64(0); i < 6; i++ {
 		s := hexagonSide()
