@@ -26,6 +26,18 @@ type Object interface {
 	NormalToWorld(normalVector ray.Vector) (vector ray.Vector)
 }
 
+func NormalAt(xs Intersection, worldPoint ray.Vector) ray.Vector {
+	localPoint := xs.Obj.WorldToObject(worldPoint)
+	localNormal := xs.Obj.LocalNormalAt(localPoint)
+	return xs.Obj.NormalToWorld(localNormal)
+}
+
+func Intersect(obj Object, rr ray.Ray) Intersections {
+	return obj.
+		LocalIntersect(
+			rr.Transform(obj.TransformInverse()))
+}
+
 type BasicObject struct {
 	Transform ray.Matrix
 	Material  Material

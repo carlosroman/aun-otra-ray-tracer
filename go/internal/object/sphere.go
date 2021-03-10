@@ -12,20 +12,8 @@ type sphere struct {
 	r float64
 }
 
-func NormalAt(obj Object, worldPoint ray.Vector) ray.Vector {
-	localPoint := obj.WorldToObject(worldPoint)
-	localNormal := obj.LocalNormalAt(localPoint)
-	return obj.NormalToWorld(localNormal)
-}
-
 func (s sphere) LocalNormalAt(worldPoint ray.Vector) ray.Vector {
 	return worldPoint.Subtract(s.c)
-}
-
-func Intersect(obj Object, rr ray.Ray) Intersections {
-	return obj.
-		LocalIntersect(
-			rr.Transform(obj.TransformInverse()))
 }
 
 func (s *sphere) LocalIntersect(r ray.Ray) Intersections {

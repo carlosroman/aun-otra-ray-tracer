@@ -258,7 +258,7 @@ func TestNormalAt(t *testing.T) {
 			if tt.transform != nil {
 				require.NoError(t, tt.sphere.SetTransform(tt.transform))
 			}
-			actual := object.NormalAt(tt.sphere, tt.point)
+			actual := object.NormalAt(object.Intersection{Obj: tt.sphere}, tt.point)
 			assertVec(t, tt.expected, actual)
 			assertVec(t, tt.expected, actual.Normalize())
 		})
@@ -276,7 +276,7 @@ func TestNormalAt(t *testing.T) {
 		require.NoError(t, s.SetTransform(ray.Translation(5, 0, 0)))
 		g2.AddChild(s)
 
-		p := object.NormalAt(s, ray.NewPoint(1.7321, 1.1547, -5.5774))
+		p := object.NormalAt(object.Intersection{Obj: s}, ray.NewPoint(1.7321, 1.1547, -5.5774))
 		assertVec(t, ray.NewVec(0.2857, 0.42854, -0.85716), p)
 	})
 }

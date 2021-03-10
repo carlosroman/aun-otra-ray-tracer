@@ -84,7 +84,7 @@ func PrepareComputations(i object.Intersection, r ray.Ray, xs ...object.Intersec
 	comps.obj = i.Obj
 	comps.point = r.PointAt(comps.t)
 	comps.eyev = r.Direction().Negate()
-	comps.normalv = object.NormalAt(i.Obj, comps.point)
+	comps.normalv = object.NormalAt(i, comps.point)
 	comps.reflectv = r.Direction().Reflect(comps.normalv)
 
 	if ray.Dot(comps.normalv, comps.eyev) < 0 {
