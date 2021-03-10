@@ -10,11 +10,26 @@ import (
 type triangle struct {
 	obj
 	p1, p2, p3 ray.Vector
+	n1, n2, n3 ray.Vector
 	e1, e2     ray.Vector
-	normal     ray.Vector
 }
 
-func NewTriangle(p1, p2, p3 ray.Vector) Object {
+func WithNormals(n1, n2, n3 ray.Vector) Option {
+	return OptionFunc(func(o Object) {
+		if t, ok := o.(*triangle); ok {
+			t.n1 = n1
+			t.n2 = n2
+			t.n3 = n3
+		}
+	})
+}
+
+func NewSmoothTriangle(p1, p2, p3, n1, n2, n3 ray.Vector, opts ...Option) Object {
+	opts = append(opts, WithNormals(n1, n2, n3))
+	return NewTriangle(p1, p2, p3, opts...)
+}
+
+func NewTriangle(p1, p2, p3 ray.Vector, opts ...Option) Object {
 	t := triangle{
 		p1: p1,
 		p2: p2,
@@ -22,7 +37,14 @@ func NewTriangle(p1, p2, p3 ray.Vector) Object {
 		e1: p2.Subtract(p1),
 		e2: p3.Subtract(p1),
 	}
-	t.normal = ray.Cross(t.e2, t.e1).Normalize()
+	normal := ray.Cross(t.e2, t.e1).Normalize()
+	t.n1 = normal
+	t.n2 = normal
+	t.n3 = normal
+
+	for i := range opts {
+		opts[i].Apply(&t)
+	}
 
 	_ = t.SetTransform(ray.DefaultIdentityMatrix())
 	t.SetMaterial(DefaultMaterial())
@@ -30,11 +52,14 @@ func NewTriangle(p1, p2, p3 ray.Vector) Object {
 }
 
 func (t triangle) String() string {
-	return fmt.Sprintf("e1: %v, e2: %v, normal: %v", t.e1, t.e2, t.normal)
+	return fmt.Sprintf("e1: %v, e2: %v, n1: %v, n2: %v, n3: %v", t.e1, t.e2, t.n1, t.n2, t.n3)
 }
 
-func (t triangle) LocalNormalAt(_ ray.Vector, _ Intersection) ray.Vector {
-	return t.normal
+func (t triangle) LocalNormalAt(_ ray.Vector, hit Intersection) ray.Vector {
+	a := t.n2.Multiply(hit.U)
+	b := t.n3.Multiply(hit.V)
+	c := t.n1.Multiply(1 - hit.U - hit.V)
+	return a.Add(b).Add(c)
 }
 
 func (t triangle) LocalIntersect(r ray.Ray) Intersections {
@@ -61,5 +86,7 @@ func (t triangle) LocalIntersect(r ray.Ray) Intersections {
 	return Intersections{Intersection{
 		T:   f * ray.Dot(t.e2, origCrossE1),
 		Obj: &t,
+		U:   u,
+		V:   v,
 	}}
 }

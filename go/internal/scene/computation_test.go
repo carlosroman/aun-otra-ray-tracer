@@ -24,6 +24,7 @@ func TestPrepareComputations(t *testing.T) {
 		expectedObjectTranslation                    ray.Matrix
 		expectedOverPoint                            ray.Vector
 		expectedUnderPoint                           ray.Vector
+		xsU, xsV                                     float64
 	}{
 		{
 			name:               "when an intersection occurs on the outside",
@@ -73,6 +74,23 @@ func TestPrepareComputations(t *testing.T) {
 			expectedOverPoint:         ray.NewPoint(0, 0, -0.00000001),
 			expectedUnderPoint:        ray.NewPoint(0, 0, 0.00000001),
 		},
+		{
+			name:       "Preparing the normal on a smooth triangle",
+			r:          ray.NewRayAt(ray.NewPoint(-0.2, 0.3, -2), ray.NewVec(0, 0, 1)),
+			intersectT: 5,
+			expectedObject: object.NewSmoothTriangle(
+				ray.NewPoint(0, 1, 0), ray.NewPoint(-1, 0, 0), ray.NewPoint(1, 0, 0),
+				ray.NewPoint(0, 1, 0), ray.NewPoint(-1, 0, 0), ray.NewPoint(1, 0, 0),
+			),
+			expectedObjectTranslation: ray.Translation(0, 0, 1),
+			expectedPoint:             ray.NewPoint(-0.2, 0.3, 3),
+			expectedEyev:              ray.NewVec(0, 0, -1),
+			expectedNormalv:           ray.NewVec(-0.5547, 0.83205, 0),
+			expectedOverPoint:         ray.NewPoint(-0.2, 0.3, 3),
+			expectedUnderPoint:        ray.NewPoint(-0.2, 0.3, 3),
+			xsU:                       0.45,
+			xsV:                       0.25,
+		},
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
@@ -83,6 +101,8 @@ func TestPrepareComputations(t *testing.T) {
 			i := object.Intersection{
 				T:   tt.intersectT,
 				Obj: tt.expectedObject,
+				U:   tt.xsU,
+				V:   tt.xsV,
 			}
 			// When
 			actual := scene.PrepareComputations(i, tt.r)
@@ -90,15 +110,15 @@ func TestPrepareComputations(t *testing.T) {
 			// Then
 			assert.Equal(t, tt.intersectT, actual.Intersect())
 			assert.Equal(t, tt.expectedObject, actual.Object())
-			assert.Equal(t, tt.expectedPoint, actual.Point())
-			assert.Equal(t, tt.expectedEyev, actual.Eyev())
-			assert.Equal(t, tt.expectedNormalv, actual.Normalv())
+			assertVectorEqual(t, tt.expectedPoint, actual.Point())
+			assertVectorEqual(t, tt.expectedEyev, actual.Eyev())
+			assertVectorEqual(t, tt.expectedNormalv, actual.Normalv())
 			assert.Equal(t, tt.expectedInside, actual.Inside())
-			assert.Equal(t, tt.expectedOverPoint, actual.OverPoint())
-			assert.Equal(t, tt.expectedUnderPoint, actual.UnderPoint())
-			assert.True(t, actual.Point().GetZ() < actual.UnderPoint().GetZ())
+			assertVectorEqual(t, tt.expectedOverPoint, actual.OverPoint())
+			assertVectorEqual(t, tt.expectedUnderPoint, actual.UnderPoint())
+			assert.True(t, actual.Point().GetZ() <= actual.UnderPoint().GetZ())
 
-			assert.True(t, actual.Point().GetZ() > actual.OverPoint().GetZ(),
+			assert.True(t, actual.Point().GetZ() >= actual.OverPoint().GetZ(),
 				fmt.Sprintf("Got %v > %v", actual.Point().GetZ(), actual.OverPoint().GetZ()))
 
 			// Does not seem to always be true :/
