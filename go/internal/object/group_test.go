@@ -11,10 +11,39 @@ import (
 )
 
 func TestNewGroup(t *testing.T) {
-	g := object.NewGroup()
-	assert.Equal(t, ray.DefaultIdentityMatrix(), g.Transform())
-	assert.Equal(t, ray.DefaultIdentityMatrixInverse(), g.TransformInverse())
-	assert.Empty(t, g.Children)
+	tmpMaterial := object.DefaultMaterial()
+	tmpMaterial.Ambient = 2
+
+	testCases := []struct {
+		name                          string
+		expectedIdentityMatrix        ray.Matrix
+		expectedIdentityMatrixInverse ray.Matrix
+		expectedMaterial              object.Material
+		opts                          []object.Option
+	}{
+		{
+			name:                          "Default",
+			expectedIdentityMatrix:        ray.DefaultIdentityMatrix(),
+			expectedIdentityMatrixInverse: ray.DefaultIdentityMatrixInverse(),
+			expectedMaterial:              object.DefaultMaterial(),
+		},
+		{
+			name:                          "Opts",
+			expectedIdentityMatrix:        ray.DefaultIdentityMatrix(),
+			expectedIdentityMatrixInverse: ray.DefaultIdentityMatrixInverse(),
+			expectedMaterial:              tmpMaterial,
+			opts:                          []object.Option{object.WithMaterial(tmpMaterial)},
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			g := object.NewGroup(tt.opts...)
+			assert.Equal(t, tt.expectedIdentityMatrix, g.Transform())
+			assert.Equal(t, tt.expectedIdentityMatrixInverse, g.TransformInverse())
+			assert.Equal(t, tt.expectedMaterial, g.Material())
+			assert.Empty(t, g.Children)
+		})
+	}
 }
 
 func TestGroup_AddChild(t *testing.T) {

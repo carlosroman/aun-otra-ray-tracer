@@ -18,9 +18,14 @@ func (g *Group) AddChild(children ...Object) {
 	}
 }
 
-func NewGroup() Group {
+func NewGroup(opts ...Option) Group {
 	g := Group{}
+
 	_ = g.SetTransform(ray.DefaultIdentityMatrix())
+	g.SetMaterial(DefaultMaterial())
+	for i := range opts {
+		opts[i].Apply(&g)
+	}
 	return g
 }
 
