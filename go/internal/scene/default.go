@@ -6,23 +6,49 @@ import (
 )
 
 func DefaultWorld() (w World, err error) {
-	light := DefaultWorldLight()
+	w = NewWorld()
+	w.AddLight(DefaultWorldLight())
+
+	m1 := object.DefaultMaterial()
+	m1.Color = object.NewColor(0.8, 1.0, 0.6)
+	m1.Diffuse = 0.7
+	m1.Specular = 0.2
+	s1 := object.NewSphere(ray.ZeroPoint, 1,
+		object.WithMaterial(m1),
+	)
+
+	s2 := object.NewSphere(ray.ZeroPoint, 1,
+		object.WithTransform(ray.Scaling(0.5, 0.5, 0.5)),
+	)
+
+	w.AddObjects(s1, s2)
+	return w, err
+}
+
+func DefaultWorldWithGroups() (w World, err error) {
+	w = NewWorld()
+	w.AddLight(DefaultWorldLight())
 
 	s1 := object.NewSphere(ray.ZeroPoint, 1)
 	m1 := object.DefaultMaterial()
 	m1.Color = object.NewColor(0.8, 1.0, 0.6)
 	m1.Diffuse = 0.7
 	m1.Specular = 0.2
-	s1.SetMaterial(m1)
+
+	g1 := object.NewGroup(
+		object.WithMaterial(m1),
+	)
+	g1.AddChild(s1)
 
 	s2 := object.NewSphere(ray.ZeroPoint, 1)
 	err = s2.SetTransform(ray.Scaling(0.5, 0.5, 0.5))
 	if err != nil {
 		return nil, err
 	}
-	w = NewWorld()
-	w.AddObjects(s1, s2)
-	w.AddLight(light)
+	g2 := object.NewGroup()
+	g2.AddChild(s2)
+
+	w.AddObjects(&g1, &g2)
 	return w, err
 }
 
