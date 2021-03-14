@@ -66,12 +66,15 @@ func (o *obj) SetParent(obj Object) {
 	o.p = obj
 }
 
-func NewTestShape() Object {
+func NewTestShape(opts ...Option) Object {
 	s := obj{}
 	_ = s.SetTransform(ray.DefaultIdentityMatrix())
 	m := DefaultMaterial()
 	m.Ambient = 1
 	s.SetMaterial(m)
+	for i := range opts {
+		opts[i].Apply(&s)
+	}
 	return &s
 }
 
@@ -91,6 +94,9 @@ func (o obj) TransformInverse() ray.Matrix {
 }
 
 func (o obj) Material() Material {
+	if o.p != nil {
+		return o.p.Material()
+	}
 	return o.m
 }
 

@@ -44,3 +44,15 @@ func (g Group) LocalIntersect(r ray.Ray) (xs Intersections) {
 	})
 	return xs
 }
+
+func (g Group) Object() Object {
+	return &g
+}
+
+func WithChildren(objs ...Object) Option {
+	return OptionFunc(func(o Object) {
+		if g, ok := o.(*Group); ok {
+			g.AddChild(objs...)
+		}
+	})
+}

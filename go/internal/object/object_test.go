@@ -47,6 +47,37 @@ func TestObj_Parent(t *testing.T) {
 	assert.Equal(t, &g, actual)
 }
 
+func TestObj_Material(t *testing.T) {
+	m := object.DefaultMaterial()
+	m.Color = object.Red
+	testCases := []struct {
+		name     string
+		obj      object.Object
+		expected object.Material
+	}{
+		{
+			name: "No parent",
+			obj: object.NewTestShape(
+				object.WithMaterial(m),
+			),
+			expected: m,
+		},
+		{
+			name: "Has parent",
+			obj: object.NewGroup(
+				object.WithMaterial(m),
+				object.WithChildren(object.NewTestShape()),
+			).Object(),
+			expected: m,
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.obj.Material())
+		})
+	}
+}
+
 func assertIntersection(t *testing.T, expectedT float64, expectedObj object.Object, actual object.Intersection, msg ...string) {
 	assert.InDelta(t, expectedT, actual.T, 0.00001, msg)
 	assert.Equal(t, expectedObj, actual.Obj, msg)
