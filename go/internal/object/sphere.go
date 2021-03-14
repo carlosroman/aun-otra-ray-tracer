@@ -62,8 +62,8 @@ func NewGlassSphere(center ray.Vector, radius float64, opts ...Option) (s Object
 	return s
 }
 
-func DefaultSphere() Object {
-	return NewSphere(ray.NewPoint(0, 0, 0), 1)
+func DefaultSphere(opts ...Option) Object {
+	return NewSphere(ray.NewPoint(0, 0, 0), 1, opts...)
 }
 
 func DefaultGlassSphere() Object {
