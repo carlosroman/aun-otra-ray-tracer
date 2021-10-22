@@ -7,7 +7,7 @@ DOCKER_TARGET_CMD	= $(word 2, $(subst /, ,$(@)))
 
 # Default GO_BIN to Go binary in PATH
 GO_BIN				?= go
-GO_VERSION			?= 1.14
+GO_VERSION			?= 1.17
 GO_DOCKER_CMD		?= $(DOCKER_BIN) run --rm -it -v ${PROJECT_DIR}:/app -w /app/go golang:${GO_VERSION}
 
 TEST_PATTERN ?=.
