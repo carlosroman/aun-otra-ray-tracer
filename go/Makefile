@@ -101,3 +101,14 @@ cmd/example/cmd/models/utah-teapot.obj:
 .PHONY : build/example
 build/example: cmd/example/cmd/models
 build/example: cmd/example/cmd/models
+build/example:
+	@($(GO_BIN) build -v -o $(CURDIR)/target/ $(CURDIR)/cmd/example)
+
+
+.PHONY: docker/build/example
+docker/build/example:
+	@($(GO_DOCKER_CMD) make build/example)
+
+.PHONY: debug
+debug:
+	@(echo '$(GO_DOCKER_CMD)')

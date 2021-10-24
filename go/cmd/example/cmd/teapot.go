@@ -24,12 +24,6 @@ const (
 )
 
 var (
-	samplesPerPixel int16
-	filename        string
-	lowRes          bool
-	nx              int64
-	isJpeg          bool
-
 	//go:embed models/utah-teapot.obj
 	teapotHiRes []byte
 
@@ -38,12 +32,13 @@ var (
 )
 
 func init() {
-	teapotCmd.Flags().BoolVarP(&lowRes, "low-res", "l", false, "Select between low res and high rest")
+	// TODO: Move flags to root/global
 	teapotCmd.Flags().BoolVarP(&isJpeg, "jpeg", "j", false, "Switch output to jpeg")
 	teapotCmd.Flags().StringVarP(&filename, "filename", "f", "example", "Filename of the output")
 	teapotCmd.Flags().Int16VarP(&samplesPerPixel, "samples", "s", 4, "Number of samples per pixel")
 	teapotCmd.Flags().Int64VarP(&nx, "width", "w", 640, "Image width in pixels")
-	teapotCmd.Flags()
+
+	teapotCmd.Flags().BoolVarP(&lowRes, "low-res", "l", false, "Select between low res and high rest")
 	rootCmd.AddCommand(teapotCmd)
 }
 
@@ -112,56 +107,60 @@ var teapotCmd = &cobra.Command{
 			fmt.Println(err)
 			return err
 		}
-		//img := scene.Render(camera, world)
-		img := scene.MultiThreadedRender(c, world, 24, 1024)
-		generateImg := img.GenerateImg()
+		return renderScene(c, world, start, filename)
+	},
+}
 
-		var outFile *os.File
-		if isJpeg {
-			outFile, err = os.Create(fmt.Sprintf("%s.jpg", filename))
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
+func renderScene(c scene.Camera, world scene.World, start time.Time, fname string) (err error) {
+	//img := scene.Render(camera, world)
+	img := scene.MultiThreadedRender(c, world, 24, 1024)
+	generateImg := img.GenerateImg()
 
-			err = jpeg.Encode(outFile, generateImg, nil)
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-		} else {
-
-			ppmImage, err := output.NewPPMOutput(generateImg)
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-			outFile, err = os.Create(fmt.Sprintf("%s.ppm", filename))
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-			writer := bufio.NewWriter(outFile)
-			_, err = io.Copy(writer, ppmImage)
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-			if err = writer.Flush(); err != nil {
-				return err
-			}
-		}
-
-		err = outFile.Close()
+	var outFile *os.File
+	if isJpeg {
+		outFile, err = os.Create(fmt.Sprintf("%s.jpg", fname))
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
-		elapsed := time.Since(start)
-		fmt.Println(fmt.Sprintf("Wrote: %s in %s", outFile.Name(), elapsed))
+		err = jpeg.Encode(outFile, generateImg, nil)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	} else {
+
+		ppmImage, err := output.NewPPMOutput(generateImg)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		outFile, err = os.Create(fmt.Sprintf("%s.ppm", fname))
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		writer := bufio.NewWriter(outFile)
+		_, err = io.Copy(writer, ppmImage)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		if err = writer.Flush(); err != nil {
+			return err
+		}
+	}
+
+	err = outFile.Close()
+	if err != nil {
+		fmt.Println(err)
 		return err
-	},
+	}
+
+	elapsed := time.Since(start)
+	fmt.Println(fmt.Sprintf("Wrote: %s in %s", outFile.Name(), elapsed))
+	return err
 }
 
 func loadTeapot(tp []byte, opts ...object.Option) (o object.Object, err error) {

@@ -4,3 +4,4 @@ vendor
 *.jpg
 *.exe
 cmd/example/cmd/models/*.obj
+target/
