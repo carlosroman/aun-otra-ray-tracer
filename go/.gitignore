@@ -2,3 +2,5 @@ vendor
 *.ppm
 *.out
 *.jpg
+*.exe
+cmd/example/cmd/models/*.obj

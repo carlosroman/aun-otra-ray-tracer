@@ -91,3 +91,13 @@ fmt:
 .PHONY: docker/fmt
 docker/fmt:
 	@($(GO_DOCKER_CMD) make $(DOCKER_TARGET_CMD))
+
+cmd/example/cmd/models/utah-teapot-low.obj:
+	@(cp $(CURDIR)/../test/models/utah-teapot-low.obj cmd/example/cmd/models/)
+
+cmd/example/cmd/models/utah-teapot.obj:
+	@(cp $(CURDIR)/../test/models/utah-teapot.obj cmd/example/cmd/models/)
+
+.PHONY : build/example
+build/example: cmd/example/cmd/models
+build/example: cmd/example/cmd/models
