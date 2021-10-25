@@ -34,9 +34,13 @@ go-get:
 docker/go-get:
 	@($(GO_DOCKER_CMD) make $(DOCKER_TARGET_CMD))
 
+.PHONY: test-setup
+test-setup: setup
+test-setup: go-get
+
 .PHONY: test-coverage
 test-coverage: TEST_FLAGS += -covermode=atomic -coverprofile=coverage.out
-test-coverage: go-get
+test-coverage: test-setup
 	@printf '\n================================================================\n'
 	@printf 'Target: test-coverage'
 	@printf '\n================================================================\n'
@@ -48,8 +52,7 @@ docker/test-coverage:
 	@($(GO_DOCKER_CMD) make $(DOCKER_TARGET_CMD))
 
 .PHONY: test
-test: setup
-test: go-get
+test: test-setup
 	@printf '\n================================================================\n'
 	@printf 'Target: test'
 	@printf '\n================================================================\n'
