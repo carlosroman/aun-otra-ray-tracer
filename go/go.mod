@@ -1,4 +1,4 @@
-module github.com/carlosroman/aun-otra-ray-trace/go
+module github.com/carlosroman/aun-otra-ray-tracer/go
 
 go 1.16
 

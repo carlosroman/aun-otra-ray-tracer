@@ -3,8 +3,8 @@ package scene
 import (
 	"math"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 )
 
 const (

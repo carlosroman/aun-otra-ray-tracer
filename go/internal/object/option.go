@@ -1,6 +1,6 @@
 package object
 
-import "github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+import "github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 
 type OptionFunc func(object Object)
 

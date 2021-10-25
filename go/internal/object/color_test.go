@@ -3,7 +3,7 @@ package object_test
 import (
 	"testing"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/object"
 )
 
 func TestRGB_Multiply(t *testing.T) {

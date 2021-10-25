@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 )
 
 type triangle struct {

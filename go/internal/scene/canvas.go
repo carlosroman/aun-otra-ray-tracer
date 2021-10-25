@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/object"
 )
 
 type Canvas [][]object.RGB

@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 )
 
 func Test_ray_RGBA(t *testing.T) {

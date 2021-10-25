@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 )
 
 func Test_vec3_Add(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/scene"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/scene"
 	"github.com/spf13/cobra"
 )
 

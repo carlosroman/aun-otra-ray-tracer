@@ -4,8 +4,8 @@ import (
 	"math"
 	"sync"
 
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/object"
-	"github.com/carlosroman/aun-otra-ray-trace/go/internal/ray"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/object"
+	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 )
 
 func NewCamera(hSize, vSize int, from, to, vup ray.Vector) (c Camera, err error) {
