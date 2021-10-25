@@ -34,7 +34,7 @@ var (
 func init() {
 	// TODO: Move flags to root/global
 	teapotCmd.Flags().BoolVarP(&isJpeg, "jpeg", "j", false, "Switch output to jpeg")
-	teapotCmd.Flags().StringVarP(&filename, "filename", "f", "example", "Filename of the output")
+	teapotCmd.Flags().StringVarP(&filename, "filename", "f", "teapot", "Filename of the output")
 	teapotCmd.Flags().Int16VarP(&samplesPerPixel, "samples", "s", 4, "Number of samples per pixel")
 	teapotCmd.Flags().Int64VarP(&nx, "width", "w", 640, "Image width in pixels")
 
