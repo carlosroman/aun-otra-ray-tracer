@@ -21,3 +21,6 @@ jobs:
       - name: Running unit tests
         run: make test-coverage
         working-directory: go
+      - name: Build example app
+        run: make build/example
+        working-directory: go

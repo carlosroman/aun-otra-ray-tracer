@@ -99,8 +99,8 @@ cmd/example/cmd/models/utah-teapot.obj:
 	@(cp $(CURDIR)/../test/models/utah-teapot.obj cmd/example/cmd/models/)
 
 .PHONY : build/example
-build/example: cmd/example/cmd/models
-build/example: cmd/example/cmd/models
+build/example: cmd/example/cmd/models/utah-teapot-low.obj
+build/example: cmd/example/cmd/models/utah-teapot.obj
 build/example:
 	@($(GO_BIN) build -v -o $(CURDIR)/target/ $(CURDIR)/cmd/example)
 

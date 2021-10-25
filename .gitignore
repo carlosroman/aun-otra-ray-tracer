@@ -521,3 +521,4 @@ ASALocalRun/
 
 # Project specific
 !test/models/*.obj
+.envrc
