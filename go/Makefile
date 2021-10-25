@@ -48,6 +48,7 @@ docker/test-coverage:
 	@($(GO_DOCKER_CMD) make $(DOCKER_TARGET_CMD))
 
 .PHONY: test
+test: setup
 test: go-get
 	@printf '\n================================================================\n'
 	@printf 'Target: test'
@@ -72,6 +73,7 @@ docker/benchmark:
 .PHONY: test-only
 test-only: TEST_FLAGS += -v
 test-only: fmt
+test-only: setup
 	@printf '\n================================================================\n'
 	@printf 'Target: test-only'
 	@printf '\n================================================================\n'
@@ -99,8 +101,7 @@ cmd/example/cmd/models/utah-teapot.obj:
 	@(cp $(CURDIR)/../test/models/utah-teapot.obj cmd/example/cmd/models/)
 
 .PHONY : build/example
-build/example: cmd/example/cmd/models/utah-teapot-low.obj
-build/example: cmd/example/cmd/models/utah-teapot.obj
+build/example: setup
 build/example:
 	@($(GO_BIN) build -v -o $(CURDIR)/target/ $(CURDIR)/cmd/example)
 
@@ -108,6 +109,10 @@ build/example:
 .PHONY: docker/build/example
 docker/build/example:
 	@($(GO_DOCKER_CMD) make build/example)
+
+.PHONY: setup
+setup: cmd/example/cmd/models/utah-teapot-low.obj
+setup: cmd/example/cmd/models/utah-teapot.obj
 
 .PHONY: debug
 debug:
