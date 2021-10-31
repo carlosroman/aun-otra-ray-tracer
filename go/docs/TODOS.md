@@ -1,0 +1,38 @@
+# Todos
+
+- [x] Basics:
+    - [x] Tuples, Points, and Vectors
+    - [x] Canvas (PPM)
+    - [x] Matrices basics
+    - [x] Matrix Transformations 
+- [x] Sphere rederning:
+    - [x] Rays
+    - [x] Sphere
+    - [x] Hits
+- [x] Basic light and shading:
+    - [x] Phong Reflection Model
+    - [x] Shadows
+- [x] Scene:
+    - [x] Camera
+- [x] Materials:
+    - [x] Patterns
+    - [x] Reflection
+    - [x] Transparency and Refraction
+- [x] Objects:
+    - [x] Cubes
+    - [x] Cylinders
+    - [x] Groups
+    - [x] Triangles
+    - [x] Wavefront OBJ Files
+    - [] Constructive Solid Geometry (CSG)
+- [] Advanced:
+    - [] Area Lights and Soft Shadows
+    - [] Spotlights
+    - [] Focal Blur
+    - [] Motion Blur
+    - [x] Anti-aliasing
+    - [] Texture Maps
+    - [] Normal Perturbation
+    - [] Torus Primitive
+    - [] Bounding boxes and hierarchies
+    - [] Texture mapping
