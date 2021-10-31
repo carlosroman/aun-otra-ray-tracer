@@ -97,7 +97,7 @@ example hexagon -j
 
 The file generated will be called `hexagon.jpg`.
 
-## ⭐️ Extending/Improving engine
+## ⭐️Extending/Improving engine
 
 If you want to play around with the engine and make changes then you want to make sure the unit tests run locally.
 To do this you just need to run the following Make command:
@@ -107,3 +107,5 @@ make test
 ```
 
 This will make sure that the correct `.obj` files are present int `cmd/example/cmd/models` directory.
+
+Further improvements that will be added in the future can be found in [TODO.md](docs/TODOS.md).

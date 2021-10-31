@@ -24,15 +24,15 @@
     - [x] Groups
     - [x] Triangles
     - [x] Wavefront OBJ Files
-    - [] Constructive Solid Geometry (CSG)
-- [] Advanced:
-    - [] Area Lights and Soft Shadows
-    - [] Spotlights
-    - [] Focal Blur
-    - [] Motion Blur
+    - [ ] Constructive Solid Geometry (CSG)
+- [ ] Advanced:
+    - [ ] Area Lights and Soft Shadows
+    - [ ] Spotlights
+    - [ ] Focal Blur
+    - [ ] Motion Blur
     - [x] Anti-aliasing
-    - [] Texture Maps
-    - [] Normal Perturbation
-    - [] Torus Primitive
-    - [] Bounding boxes and hierarchies
-    - [] Texture mapping
+    - [ ] Texture Maps
+    - [ ] Normal Perturbation
+    - [ ] Torus Primitive
+    - [ ] Bounding boxes and hierarchies
+    - [ ] Texture mapping
