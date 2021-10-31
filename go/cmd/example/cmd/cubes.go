@@ -22,7 +22,6 @@ func init() {
 	cubesCmd.Flags().Int16VarP(&samplesPerPixel, "samples", "s", 4, "Number of samples per pixel")
 	cubesCmd.Flags().Int64VarP(&nx, "width", "w", 640, "Image width in pixels")
 	rootCmd.AddCommand(cubesCmd)
-
 }
 
 var cubesCmd = &cobra.Command{
