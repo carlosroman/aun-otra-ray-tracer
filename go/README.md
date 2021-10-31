@@ -32,6 +32,7 @@ Running “example” will not run a render but give you the following subcomman
 
 * cubes
 * teapot
+* hexagon
 
 ### 🎲 Cubes
 
@@ -83,6 +84,18 @@ For more options on this subcommand, just run:
 ```bash
 example teapot --help
 ```
+
+### Hexagon
+
+This command just renders a basic floating hexagon made up of spheres and cylinders.
+By default, it generates an image to a [ppm file](https://en.wikipedia.org/wiki/Netpbm) (`hexagon.ppm`).
+To output a jpeg image, run the following:
+
+```bash
+example hexagon -j
+```
+
+The file generated will be called `hexagon.jpg`.
 
 ## ⭐️ Extending/Improving engine
 
