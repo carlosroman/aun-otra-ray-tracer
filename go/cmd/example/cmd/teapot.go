@@ -1,20 +1,15 @@
 package cmd
 
 import (
-	"bufio"
 	"bytes"
 	_ "embed"
 	"fmt"
-	"image/jpeg"
-	"io"
 	"math"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/object"
-	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/output"
 	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/ray"
 	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/scene"
 )
@@ -54,6 +49,7 @@ var teapotCmd = &cobra.Command{
 
 		var teapot = teapotHiRes
 		if lowRes {
+			fmt.Println("Using low res teapot")
 			teapot = teapotLowRes
 		}
 
@@ -109,58 +105,6 @@ var teapotCmd = &cobra.Command{
 		}
 		return renderScene(c, world, start, filename)
 	},
-}
-
-func renderScene(c scene.Camera, world scene.World, start time.Time, fname string) (err error) {
-	//img := scene.Render(camera, world)
-	img := scene.MultiThreadedRender(c, world, 24, 1024)
-	generateImg := img.GenerateImg()
-
-	var outFile *os.File
-	if isJpeg {
-		outFile, err = os.Create(fmt.Sprintf("%s.jpg", fname))
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-
-		err = jpeg.Encode(outFile, generateImg, nil)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-	} else {
-
-		ppmImage, err := output.NewPPMOutput(generateImg)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		outFile, err = os.Create(fmt.Sprintf("%s.ppm", fname))
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		writer := bufio.NewWriter(outFile)
-		_, err = io.Copy(writer, ppmImage)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		if err = writer.Flush(); err != nil {
-			return err
-		}
-	}
-
-	err = outFile.Close()
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	elapsed := time.Since(start)
-	fmt.Println(fmt.Sprintf("Wrote: %s in %s", outFile.Name(), elapsed))
-	return err
 }
 
 func loadTeapot(tp []byte, opts ...object.Option) (o object.Object, err error) {
