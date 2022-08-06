@@ -6,7 +6,6 @@ import (
 	"image"
 	"image/color"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -20,7 +19,7 @@ import (
 )
 
 func TestPPMWriter(t *testing.T) {
-	dir, err := ioutil.TempDir("", "TestPPMWriter")
+	dir, err := os.MkdirTemp("", "TestPPMWriter")
 	require.NoError(t, err)
 	defer func() {
 		_ = os.RemoveAll(dir)
@@ -119,7 +118,7 @@ func TestPPMWriter(t *testing.T) {
 			require.NoError(t, err)
 
 			t.Logf("Tmp Dir: %v", dir)
-			file, err := ioutil.TempFile(dir, fmt.Sprintf("test_%s.ppm", tt.name))
+			file, err := os.CreateTemp(dir, fmt.Sprintf("test_%s.ppm", tt.name))
 			require.NoError(t, err)
 			t.Logf("File: %v", file.Name())
 			writer := bufio.NewWriter(file)
@@ -130,11 +129,11 @@ func TestPPMWriter(t *testing.T) {
 			err = writer.Flush()
 			assert.NoError(t, err)
 
-			readFile, err := ioutil.ReadFile(file.Name())
+			readFile, err := os.ReadFile(file.Name())
 			assert.NoError(t, err)
 			assert.NotEmpty(t, readFile)
 
-			bytes, err := ioutil.ReadFile(tt.testFile)
+			bytes, err := os.ReadFile(tt.testFile)
 			require.NoError(t, err)
 			expectedFile := string(bytes)
 			assert.Equal(t, expectedFile, string(readFile))
@@ -143,7 +142,7 @@ func TestPPMWriter(t *testing.T) {
 }
 
 func TestNewPPMOutput(t *testing.T) {
-	dir, err := ioutil.TempDir("", "TestNewPPMOutput")
+	dir, err := os.MkdirTemp("", "TestNewPPMOutput")
 	require.NoError(t, err)
 	defer func() {
 		_ = os.RemoveAll(dir)
@@ -167,7 +166,7 @@ func TestNewPPMOutput(t *testing.T) {
 	ppmImage, err := output.NewPPMOutput(img)
 	require.NoError(t, err)
 
-	all, err := ioutil.ReadAll(ppmImage)
+	all, err := io.ReadAll(ppmImage)
 	require.NoError(t, err)
 
 	output := string(all)
