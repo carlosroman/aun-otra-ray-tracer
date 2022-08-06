@@ -150,6 +150,10 @@ func createTrianglesFromSquare(points []string, vertices, normals []ray.Vector) 
 func parseFaceElement(face string) (v, vt, vn int, err error) {
 	sub := pointsReg.FindAllStringSubmatch(face, 3)
 	v, err = strconv.Atoi(sub[0][0])
+	if err != nil {
+		return
+	}
+
 	if len(sub) == 1 {
 		vt = -1
 		vn = v
@@ -160,7 +164,12 @@ func parseFaceElement(face string) (v, vt, vn int, err error) {
 		vn, err = strconv.Atoi(sub[1][0])
 		return
 	}
+
 	vt, err = strconv.Atoi(sub[1][0])
+	if err != nil {
+		return
+	}
+
 	vn, err = strconv.Atoi(sub[2][0])
 	return
 }

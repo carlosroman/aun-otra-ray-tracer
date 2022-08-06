@@ -35,13 +35,12 @@ var hexagonCmd = &cobra.Command{
 		var ny = float64(nx) / ratio
 		fmt.Println(fmt.Sprintf("Generating image %v,%v with samples: %v and scale: %v", nx, ny, samplesPerPixel, scale))
 
-		var world = scene.NewWorld()
 		var camera scene.Camera
 		camera, err = getBasicCamera(int(nx), int(ny))
 		if err != nil {
 			return err
 		}
-		world, err = getBasicRoom()
+		world, err := getBasicRoom()
 		if err != nil {
 			return err
 		}
