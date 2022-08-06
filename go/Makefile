@@ -120,3 +120,12 @@ setup: cmd/example/cmd/models/utah-teapot.obj
 .PHONY: debug
 debug:
 	@(echo '$(GO_DOCKER_CMD)')
+
+bin/golangci-lint :
+	@(mkdir -p bin)
+	@(env GOBIN=$(CURDIR)/bin go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0)
+	@($(CURDIR)/bin/golangci-lint version)
+
+.PHONY : lint
+lint: bin/golangci-lint
+	@($(CURDIR)/bin/golangci-lint run ./...)

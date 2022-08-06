@@ -5,3 +5,4 @@ vendor
 *.exe
 cmd/example/cmd/models/*.obj
 target/
+bin/
