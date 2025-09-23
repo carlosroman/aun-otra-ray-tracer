@@ -21,6 +21,7 @@ func init() {
 	cubesCmd.Flags().StringVarP(&cubeFilename, "filename", "f", "cube", "Filename of the output")
 	cubesCmd.Flags().Int16VarP(&samplesPerPixel, "samples", "s", 4, "Number of samples per pixel")
 	cubesCmd.Flags().Int64VarP(&nx, "width", "w", 640, "Image width in pixels")
+	cubesCmd.Flags().BoolVarP(&profilerEnable, "profiler", "p", false, "Enable application profiling")
 	rootCmd.AddCommand(cubesCmd)
 }
 
@@ -84,7 +85,7 @@ var cubesCmd = &cobra.Command{
 		left.SetMaterial(leftM)
 
 		world.AddObjects(middle, right, left)
-		return renderScene(camera, world, start, cubeFilename)
+		return renderScene(camera, world, start, cubeFilename, "cubes")
 	},
 }
 

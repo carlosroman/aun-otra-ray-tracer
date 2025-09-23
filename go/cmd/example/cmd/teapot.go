@@ -34,6 +34,7 @@ func init() {
 	teapotCmd.Flags().Int64VarP(&nx, "width", "w", 640, "Image width in pixels")
 
 	teapotCmd.Flags().BoolVarP(&lowRes, "low-res", "l", false, "Select between low res and high rest")
+	teapotCmd.Flags().BoolVarP(&profilerEnable, "profiler", "p", false, "Enable application profiling")
 	rootCmd.AddCommand(teapotCmd)
 }
 
@@ -103,7 +104,7 @@ var teapotCmd = &cobra.Command{
 			fmt.Println(err)
 			return err
 		}
-		return renderScene(c, world, start, filename)
+		return renderScene(c, world, start, filename, "teapot")
 	},
 }
 

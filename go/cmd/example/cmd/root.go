@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/DataDog/dd-trace-go/v2/profiler"
+
 	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/output"
 	"github.com/carlosroman/aun-otra-ray-tracer/go/internal/scene"
 )
@@ -22,6 +24,7 @@ var (
 	lowRes          bool
 	nx              int64
 	isJpeg          bool
+	profilerEnable  bool
 	rootCmd         = &cobra.Command{
 		Use:   "example",
 		Short: "Some example 3D renders",
@@ -41,7 +44,39 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
-func renderScene(c scene.Camera, world scene.World, start time.Time, fname string) (err error) {
+func stopProfiler() {
+	fmt.Println("Stopping profiler...")
+	if profilerEnable {
+		profiler.Stop()
+	}
+}
+
+func startProfiler(model string) (err error) {
+	if !profilerEnable {
+		return
+	}
+	err = profiler.Start(
+		profiler.WithService("aun-otra-ray-tracer"),
+		profiler.WithEnv("example"),
+		// profiler.WithVersion("<APPLICATION_VERSION>"),
+		profiler.WithTags(fmt.Sprintf("model:%s", model)),
+		profiler.WithPeriod(2*time.Minute),
+		profiler.WithProfileTypes(
+			profiler.CPUProfile,
+			profiler.HeapProfile,
+			// The profiles below are disabled by default to keep overhead
+			// low, but can be enabled as needed.
+			profiler.BlockProfile,
+			profiler.MutexProfile,
+			profiler.GoroutineProfile,
+		),
+	)
+	return err
+}
+
+func renderScene(c scene.Camera, world scene.World, start time.Time, fname string, sname string) (err error) {
+	startProfiler(sname)
+	defer stopProfiler()
 	//img := scene.Render(camera, world)
 	workerCount := runtime.GOMAXPROCS(0)
 	fmt.Println(fmt.Sprintf("Setting no of workers to: %v", workerCount))

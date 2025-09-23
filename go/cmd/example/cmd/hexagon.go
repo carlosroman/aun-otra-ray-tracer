@@ -22,6 +22,7 @@ func init() {
 	hexagonCmd.Flags().StringVarP(&hexagonFilename, "filename", "f", "cube", "Filename of the output")
 	hexagonCmd.Flags().Int16VarP(&samplesPerPixel, "samples", "s", 4, "Number of samples per pixel")
 	hexagonCmd.Flags().Int64VarP(&nx, "width", "w", 640, "Image width in pixels")
+	hexagonCmd.Flags().BoolVarP(&profilerEnable, "profiler", "p", false, "Enable application profiling")
 	rootCmd.AddCommand(hexagonCmd)
 }
 
@@ -53,6 +54,6 @@ var hexagonCmd = &cobra.Command{
 					ray.Rotation(ray.X, -math.Pi/12))),
 		)
 		world.AddObjects(hex)
-		return renderScene(camera, world, start, hexagonFilename)
+		return renderScene(camera, world, start, hexagonFilename, "hexagon")
 	},
 }
